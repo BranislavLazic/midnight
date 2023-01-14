@@ -12,11 +12,11 @@ import (
 
 func InitRouter(port int, cache *bigcache.BigCache, staticFiles embed.FS) error {
 	app := fiber.New()
-	livenessRoutes := NewLivenessRoutes(cache)
+	serviceStatusRoutes := NewServiceStatusRoutes(cache)
 
 	initStaticRoutes(app, staticFiles)
 
-	app.Get("/v1/status", livenessRoutes.GetStatus)
+	app.Get("/v1/status", serviceStatusRoutes.GetStatus)
 
 	err := app.Listen(fmt.Sprintf(":%d", port))
 	if err != nil {

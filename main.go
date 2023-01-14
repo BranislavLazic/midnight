@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"github.com/branislavlazic/midnight/db"
+	"github.com/branislavlazic/midnight/repository/postgres"
 	"time"
 
 	"github.com/allegro/bigcache/v3"
@@ -35,7 +36,9 @@ func main() {
 
 	scheduler := gocron.NewScheduler(time.UTC)
 	taskProvider := task.NewProvider(cache)
-	err = task.InitScheduler(scheduler, taskProvider, pgDb)
+	serviceRepo := postgres.NewPgServiceRepository(pgDb)
+
+	err = task.InitScheduler(scheduler, taskProvider, serviceRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize scheduler")
 	}

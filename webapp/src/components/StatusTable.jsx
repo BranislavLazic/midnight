@@ -4,13 +4,13 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 
 const StatusTable = () => {
-  const [liveness, setLiveness] = useState([]);
+  const [serviceStatuses, setServiceStatuses] = useState([]);
 
   useEffect(() => {
     (async () => {
       try {
         const { data } = await axios.get('http://localhost:8000/v1/status');
-        setLiveness(data);
+        setServiceStatuses(data);
       } catch (e) {
         console.error(e);
       }
@@ -27,7 +27,7 @@ const StatusTable = () => {
             <Table.HeadCell>Version</Table.HeadCell>
           </Table.Head>
           <Table.Body>
-            {liveness.map((l, idx) => (
+            {serviceStatuses.map((l, idx) => (
               <Table.Row
                 key={idx}
                 className="bg-white dark:border-gray-700 dark:bg-gray-800"

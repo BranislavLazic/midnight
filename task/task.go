@@ -9,9 +9,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const LivenessCacheName = "liveness"
+const ServiceStatusCacheName = "service-status"
 
-type Liveness struct {
+type ServiceStatus struct {
 	ID         int64  `json:"id"`
 	Name       string `json:"name"`
 	URL        string `json:"url"`
@@ -20,11 +20,11 @@ type Liveness struct {
 	StatusCode int    `json:"statusCode"`
 }
 
-type LivenessResponse struct {
+type ServiceStatusResponse struct {
 	Version string `json:"version"`
 }
 
-type TaskConfig struct {
+type Config struct {
 	ID      int64
 	Name    string
 	URL     string
@@ -39,7 +39,7 @@ func NewProvider(cache *bigcache.BigCache) *Provider {
 	return &Provider{cache: cache}
 }
 
-func (tp *Provider) NewTask(config TaskConfig) func() {
+func (tp *Provider) NewTask(config Config) func() {
 	return func() {
 		req, err := http.NewRequest(http.MethodGet, config.URL, nil)
 		if err != nil {
@@ -51,51 +51,46 @@ func (tp *Provider) NewTask(config TaskConfig) func() {
 		res, err := client.Do(req)
 		if err != nil {
 			log.Warn().Err(err).Msg("failed to get a response")
-			tp.handleFailureResponse(config.ID, config.Name, config.URL)
+			err := tp.saveServiceStatus(ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Status: "404 Not Found", StatusCode: 404})
+			if err != nil {
+				log.Error().Err(err).Msg("failed to set task")
+			}
 		} else {
-			tp.handleSuccessResponse(res, config.ID, config.Name, config.URL)
+			log.Debug().Msg(res.Status)
+			var serviceStatusResponse ServiceStatusResponse
+			err := json.NewDecoder(res.Body).Decode(&serviceStatusResponse)
+			if err != nil {
+				log.Debug().Err(err).Msg("failed to extract request body")
+			}
+			err = tp.saveServiceStatus(
+				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Version: serviceStatusResponse.Version, Status: res.Status, StatusCode: res.StatusCode},
+			)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to set task")
+			}
 		}
 	}
 }
 
-func (tp *Provider) handleSuccessResponse(res *http.Response, id int64, name, url string) {
-	log.Debug().Msg(res.Status)
-	var livenessResponse LivenessResponse
-	err := json.NewDecoder(res.Body).Decode(&livenessResponse)
+func (tp *Provider) saveServiceStatus(serviceStatus ServiceStatus) error {
+	bytes, err := tp.cache.Get(ServiceStatusCacheName)
 	if err != nil {
-		log.Warn().Err(err).Msg("failed to extract request body")
-	}
-	err = tp.setLiveness(
-		Liveness{ID: id, Name: name, URL: url, Version: livenessResponse.Version, Status: res.Status, StatusCode: res.StatusCode},
-	)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to set task")
-	}
-}
-
-func (tp *Provider) handleFailureResponse(id int64, name, url string) {
-	err := tp.setLiveness(Liveness{ID: id, Name: name, URL: url, Status: "404 Not Found", StatusCode: 404})
-	if err != nil {
-		log.Error().Err(err).Msg("failed to set task")
-	}
-}
-
-func (tp *Provider) setLiveness(liveness Liveness) error {
-	bytes, err := tp.cache.Get(LivenessCacheName)
-	if err != nil {
-		return tp.cache.Set(LivenessCacheName, serializeLiveness(map[int64]Liveness{liveness.ID: liveness}))
+		return tp.cache.Set(
+			ServiceStatusCacheName,
+			serializeServiceStatus(map[int64]ServiceStatus{serviceStatus.ID: serviceStatus}),
+		)
 	} else {
-		var livenesses map[int64]Liveness
-		err = json.Unmarshal(bytes, &livenesses)
+		var serviceStatuses map[int64]ServiceStatus
+		err = json.Unmarshal(bytes, &serviceStatuses)
 		if err != nil {
 			return err
 		}
-		livenesses[liveness.ID] = liveness
-		return tp.cache.Set(LivenessCacheName, serializeLiveness(livenesses))
+		serviceStatuses[serviceStatus.ID] = serviceStatus
+		return tp.cache.Set(ServiceStatusCacheName, serializeServiceStatus(serviceStatuses))
 	}
 }
 
-func serializeLiveness(liveness map[int64]Liveness) []byte {
-	bytes, _ := json.Marshal(&liveness)
+func serializeServiceStatus(serviceStatuses map[int64]ServiceStatus) []byte {
+	bytes, _ := json.Marshal(&serviceStatuses)
 	return bytes
 }
