@@ -17,7 +17,7 @@ func NewLivenessRoutes(cache *bigcache.BigCache) *LivenessRoutes {
 	return &LivenessRoutes{cache: cache}
 }
 
-func (lr *LivenessRoutes) GetStatuses(ctx *fiber.Ctx) error {
+func (lr *LivenessRoutes) GetStatus(ctx *fiber.Ctx) error {
 	bytes, err := lr.cache.Get(task.LivenessCacheName)
 	if err != nil {
 		return ctx.SendStatus(http.StatusInternalServerError)
