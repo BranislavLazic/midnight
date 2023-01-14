@@ -34,11 +34,11 @@ const StatusTable = () => {
               >
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   <a href={l.url} target="_blank">
-                    {l.url}
+                    {l.name || l.url}
                   </a>
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                  <Badge color="success">{l.status}</Badge>
+                  <Badge color={l.statusCode < 400 ? "success" : "failure"}>{l.status}</Badge>
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   {l?.version}

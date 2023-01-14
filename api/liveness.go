@@ -30,16 +30,16 @@ func (lr *LivenessRoutes) GetStatus(ctx *fiber.Ctx) error {
 }
 
 func getSortedLivenesses(bytes []byte) ([]task.Liveness, error) {
-	var livenessesMap map[string]task.Liveness
+	var livenessesMap map[int64]task.Liveness
 	err := json.Unmarshal(bytes, &livenessesMap)
 	if err != nil {
 		return nil, err
 	}
-	keys := make([]string, 0, len(livenessesMap))
+	keys := make([]int64, 0, len(livenessesMap))
 	for k := range livenessesMap {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
+	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
 	var livenesses []task.Liveness
 	for _, key := range keys {
 		livenesses = append(livenesses, livenessesMap[key])

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"github.com/branislavlazic/midnight/db"
 	"time"
 
 	"github.com/allegro/bigcache/v3"
@@ -13,21 +14,33 @@ import (
 )
 
 //go:embed webapp/dist
-var embedDirStatic embed.FS
+var uiStaticFiles embed.FS
+
+//go:embed migrations/*.sql
+var dbMigrations embed.FS
 
 func main() {
+	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to initialize cache")
+	}
+	pgDb, err := db.GetPGDBPool("localhost", "postgres", "postgres", "midnight", 5432)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to initialize database")
+	}
+	err = db.RunMigrations(pgDb, dbMigrations)
+	if err != nil {
+		log.Logger.Fatal().Err(err).Msg("failed to run the migrations")
+	}
+
 	scheduler := gocron.NewScheduler(time.UTC)
-	cache, _ := bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
-
 	taskProvider := task.NewProvider(cache)
-	task1 := taskProvider.NewTask("http://localhost:8000", 5)
-	task2 := taskProvider.NewTask("https://google.rs", 5)
+	err = task.InitScheduler(scheduler, taskProvider, pgDb)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to initialize scheduler")
+	}
 
-	scheduler.Every(5).Seconds().Do(task1)
-	scheduler.Every(5).Seconds().Do(task2)
-
-	scheduler.StartAsync()
-	err := api.InitRouter(8000, cache, embedDirStatic)
+	err = api.InitRouter(8000, cache, uiStaticFiles)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start the server")
 	}
