@@ -1,0 +1,64 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/v1/services": {
+            "post": {
+                "summary": "Create a service",
+                "parameters": [
+                    {
+                        "description": "Create service request body",
+                        "name": "createServiceRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateServiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.CreateServiceRequest": {
+            "type": "object",
+            "required": [
+                "checkIntervalSeconds",
+                "url"
+            ],
+            "properties": {
+                "checkIntervalSeconds": {
+                    "type": "integer",
+                    "maximum": 1000000
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "url": {
+                    "type": "string",
+                    "maxLength": 4096
+                }
+            }
+        }
+    }
+}

@@ -37,13 +37,13 @@ func main() {
 	scheduler := gocron.NewScheduler(time.UTC)
 	taskProvider := task.NewProvider(cache)
 	serviceRepo := postgres.NewPgServiceRepository(pgDb)
-
-	err = task.InitScheduler(scheduler, taskProvider, serviceRepo)
+	taskScheduler := task.NewScheduler(scheduler, taskProvider, serviceRepo)
+	err = taskScheduler.RunAll()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize scheduler")
 	}
 
-	err = api.InitRouter(8000, cache, uiStaticFiles)
+	err = api.InitRouter(8000, cache, serviceRepo, taskScheduler, uiStaticFiles)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start the server")
 	}

@@ -6,23 +6,47 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func InitScheduler(scheduler *gocron.Scheduler, taskProvider *Provider, serviceRepo model.ServiceRepository) error {
-	services, err := serviceRepo.GetAll()
+type Scheduler struct {
+	scheduler    *gocron.Scheduler
+	taskProvider *Provider
+	serviceRepo  model.ServiceRepository
+}
+
+func NewScheduler(scheduler *gocron.Scheduler, taskProvider *Provider, serviceRepo model.ServiceRepository) *Scheduler {
+	return &Scheduler{scheduler: scheduler, taskProvider: taskProvider, serviceRepo: serviceRepo}
+}
+
+func (s *Scheduler) RunAll() error {
+	services, err := s.serviceRepo.GetAll()
 	if err != nil {
 		return err
 	}
-	for _, s := range services {
+	for _, service := range services {
 		log.Info().Msgf(
-			"initializing service %s at %s - check every %d seconds", s.Name, s.URL, s.CheckIntervalSeconds,
+			"initializing service %service at %service - check every %d seconds", service.Name, service.URL, service.CheckIntervalSeconds,
 		)
-		taskConfig := Config{ID: int64(s.ID), Name: s.Name, URL: s.URL, Timeout: s.CheckIntervalSeconds}
-		_, err := scheduler.Every(s.CheckIntervalSeconds).
+		taskConfig := Config{ID: int64(service.ID), Name: service.Name, URL: service.URL, Timeout: service.CheckIntervalSeconds}
+		_, err := s.scheduler.Every(service.CheckIntervalSeconds).
 			Seconds().
-			Do(taskProvider.NewTask(taskConfig))
+			Do(s.taskProvider.NewTask(taskConfig))
 		if err != nil {
 			return err
 		}
 	}
-	scheduler.StartAsync()
+	s.scheduler.StartAsync()
+	return nil
+}
+
+func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
+	job, err := s.scheduler.Every(checkIntervalSeconds).
+		Seconds().
+		Do(s.taskProvider.NewTask(cfg))
+	if err != nil {
+		return err
+	}
+	_, err = s.scheduler.Job(job).Update()
+	if err != nil {
+		return err
+	}
 	return nil
 }

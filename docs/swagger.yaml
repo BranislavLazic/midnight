@@ -1,0 +1,41 @@
+definitions:
+  model.CreateServiceRequest:
+    properties:
+      checkIntervalSeconds:
+        maximum: 1000000
+        type: integer
+      name:
+        maxLength: 255
+        type: string
+      url:
+        maxLength: 4096
+        type: string
+    required:
+    - checkIntervalSeconds
+    - url
+    type: object
+info:
+  contact: {}
+paths:
+  /v1/services:
+    post:
+      parameters:
+      - description: Create service request body
+        in: body
+        name: createServiceRequest
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateServiceRequest'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Create a service
+swagger: "2.0"
