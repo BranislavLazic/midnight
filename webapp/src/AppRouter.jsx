@@ -28,7 +28,14 @@ const AppRouter = () => {
             </Dashboard>
           }
         />
-        <Route path="/dashboard/services" element={<Dashboard></Dashboard>} />
+        <Route
+          path="/dashboard/services"
+          element={
+            <Dashboard>
+              <ServiceForm />
+            </Dashboard>
+          }
+        />
       </Routes>
     </Router>
   );
