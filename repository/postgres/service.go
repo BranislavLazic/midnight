@@ -24,6 +24,12 @@ func (psr *ServiceRepository) GetAll() ([]model.Service, error) {
 	return services, resp.Error
 }
 
+func (psr *ServiceRepository) GetById(ID model.ServiceID) (*model.Service, error) {
+	var service *model.Service
+	resp := psr.db.First(&service, ID)
+	return service, resp.Error
+}
+
 func (psr *ServiceRepository) ExistsByURL(URL string) bool {
 	var service *model.Service
 	return psr.db.First(&service, "url = ?", URL).Error == nil

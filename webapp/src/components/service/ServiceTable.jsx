@@ -46,11 +46,11 @@ const ServiceTable = () => {
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white flex gap-2">
                   <Link to={`/dashboard/services/${s.id}`}>
-                    <Button color="light">
+                    <Button color="gray">
                       <PencilIcon className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button color="light">
+                  <Button color="gray">
                     <TrashIcon className="h-4 w-4" />
                   </Button>
                 </Table.Cell>

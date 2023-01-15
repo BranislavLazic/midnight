@@ -68,7 +68,26 @@ func (lr *ServiceRoutes) GetAllServices(ctx *fiber.Ctx) error {
 	services, err := lr.serviceRepo.GetAll()
 	if err != nil {
 		log.Debug().Err(err).Msg("failed to fetch all services")
-		ctx.SendStatus(http.StatusNotFound)
+		return ctx.SendStatus(http.StatusNotFound)
 	}
 	return ctx.Status(http.StatusOK).JSON(services)
+}
+
+// GetById godoc
+// @Summary Get a service by id
+// @Param id path string true "Service ID"
+// @Failure 404
+// @Success 200
+// @Router /v1/services/{id} [get]
+func (lr *ServiceRoutes) GetById(ctx *fiber.Ctx) error {
+	id, err := ctx.ParamsInt("id")
+	if err != nil {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+	service, err := lr.serviceRepo.GetById(model.ServiceID(id))
+	if err != nil {
+		log.Debug().Err(err).Msgf("failed to a service for id %d services", id)
+		return ctx.SendStatus(http.StatusNotFound)
+	}
+	return ctx.Status(http.StatusOK).JSON(service)
 }

@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"embed"
+	"time"
+
 	"github.com/branislavlazic/midnight/db"
 	"github.com/branislavlazic/midnight/repository/postgres"
-	"time"
 
 	"github.com/allegro/bigcache/v3"
 	"github.com/branislavlazic/midnight/api"
@@ -16,6 +17,9 @@ import (
 
 //go:embed webapp/dist
 var uiStaticFiles embed.FS
+
+//go:embed webapp/dist/index.html
+var indexFile embed.FS
 
 //go:embed migrations/*.sql
 var dbMigrations embed.FS
@@ -43,7 +47,7 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to initialize scheduler")
 	}
 
-	err = api.InitRouter(8000, cache, serviceRepo, taskScheduler, uiStaticFiles)
+	err = api.InitRouter(8000, cache, serviceRepo, taskScheduler, indexFile, uiStaticFiles)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start the server")
 	}

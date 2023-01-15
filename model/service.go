@@ -33,5 +33,6 @@ func (csr *CreateServiceRequest) ToPersistentService() *Service {
 type ServiceRepository interface {
 	Create(service *Service) (ServiceID, error)
 	GetAll() ([]Service, error)
+	GetById(ID ServiceID) (*Service, error)
 	ExistsByURL(URL string) bool
 }

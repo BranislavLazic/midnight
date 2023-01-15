@@ -18,6 +18,13 @@ info:
   contact: {}
 paths:
   /v1/services:
+    get:
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: Get all services
     post:
       parameters:
       - description: Create service request body
@@ -33,9 +40,25 @@ paths:
           description: Bad Request
         "404":
           description: Not Found
+        "409":
+          description: Conflict
         "422":
           description: Unprocessable Entity
         "500":
           description: Internal Server Error
       summary: Create a service
+  /v1/services/{id}:
+    get:
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: Get a service by id
 swagger: "2.0"
