@@ -72,6 +72,20 @@ func (tp *Provider) NewTask(config Config) func() {
 	}
 }
 
+func (tp *Provider) RemoveTask(ID int64) error {
+	bytes, err := tp.cache.Get(ServiceStatusCacheName)
+	if err != nil {
+		return nil
+	}
+	var serviceStatuses map[int64]ServiceStatus
+	err = json.Unmarshal(bytes, &serviceStatuses)
+	if err != nil {
+		return err
+	}
+	delete(serviceStatuses, ID)
+	return tp.cache.Set(ServiceStatusCacheName, serializeServiceStatus(serviceStatuses))
+}
+
 func (tp *Provider) saveServiceStatus(serviceStatus ServiceStatus) error {
 	bytes, err := tp.cache.Get(ServiceStatusCacheName)
 	if err != nil {

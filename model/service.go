@@ -34,5 +34,6 @@ type ServiceRepository interface {
 	Create(service *Service) (ServiceID, error)
 	GetAll() ([]Service, error)
 	GetById(ID ServiceID) (*Service, error)
+	DeleteById(ID ServiceID) error
 	ExistsByURL(URL string) bool
 }

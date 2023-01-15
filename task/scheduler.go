@@ -4,6 +4,7 @@ import (
 	"github.com/branislavlazic/midnight/model"
 	"github.com/go-co-op/gocron"
 	"github.com/rs/zerolog/log"
+	"strconv"
 )
 
 type Scheduler struct {
@@ -27,6 +28,7 @@ func (s *Scheduler) RunAll() error {
 		)
 		taskConfig := Config{ID: int64(service.ID), Name: service.Name, URL: service.URL, Timeout: service.CheckIntervalSeconds}
 		_, err := s.scheduler.Every(service.CheckIntervalSeconds).
+			Tag(strconv.FormatInt(int64(service.ID), 10)).
 			Seconds().
 			Do(s.taskProvider.NewTask(taskConfig))
 		if err != nil {
@@ -39,6 +41,7 @@ func (s *Scheduler) RunAll() error {
 
 func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
 	job, err := s.scheduler.Every(checkIntervalSeconds).
+		Tag(strconv.FormatInt(cfg.ID, 10)).
 		Seconds().
 		Do(s.taskProvider.NewTask(cfg))
 	if err != nil {
@@ -49,4 +52,9 @@ func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Scheduler) Remove(ID int64) error {
+	_ = s.taskProvider.RemoveTask(ID)
+	return s.scheduler.RemoveByTag(strconv.FormatInt(ID, 10))
 }

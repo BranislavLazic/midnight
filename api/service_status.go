@@ -17,10 +17,15 @@ func NewServiceStatusRoutes(cache *bigcache.BigCache) *ServiceStatusRoutes {
 	return &ServiceStatusRoutes{cache: cache}
 }
 
+// GetStatus godoc
+// @Summary Get status
+// @Failure 404
+// @Success 200
+// @Router /v1/status [get]
 func (lr *ServiceStatusRoutes) GetStatus(ctx *fiber.Ctx) error {
 	bytes, err := lr.cache.Get(task.ServiceStatusCacheName)
 	if err != nil {
-		return ctx.SendStatus(http.StatusInternalServerError)
+		return ctx.SendStatus(http.StatusNotFound)
 	}
 	serviceStatuses, err := sortServiceStatuses(bytes)
 	if err != nil {

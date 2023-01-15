@@ -48,6 +48,23 @@ paths:
           description: Internal Server Error
       summary: Create a service
   /v1/services/{id}:
+    delete:
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+      summary: Delete a service
     get:
       parameters:
       - description: Service ID
@@ -61,4 +78,12 @@ paths:
         "404":
           description: Not Found
       summary: Get a service by id
+  /v1/status:
+    get:
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: Get status
 swagger: "2.0"

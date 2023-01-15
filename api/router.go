@@ -3,7 +3,6 @@ package api
 import (
 	"embed"
 	"fmt"
-	"github.com/branislavlazic/midnight/api/middleware/filesys"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"io/fs"
 	"net/http"
@@ -33,6 +32,7 @@ func StartServer(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRe
 	app.Post("/v1/services", serviceRoutes.CreateService)
 	app.Get("/v1/services", serviceRoutes.GetAllServices)
 	app.Get("/v1/services/:id", serviceRoutes.GetById)
+	app.Delete("/v1/services/:id", serviceRoutes.DeleteById)
 
 	// Swagger
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
@@ -48,10 +48,10 @@ func StartServer(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRe
 	// Serve svg logo
 	app.Get("/*.svg", assetsFileDir)
 	// Serve index.html
-	app.Get("/*", filesys.NewFileSys(filesystem.Config{
-		Root: http.FS(indexSubDir),
-	}))
 
+	app.Get("/*", func(ctx *fiber.Ctx) error {
+		return filesystem.SendFile(ctx, http.FS(indexSubDir), "/")
+	})
 	// Start server
 	err := app.Listen(fmt.Sprintf(":%d", port))
 	if err != nil {

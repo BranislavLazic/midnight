@@ -27,7 +27,7 @@ func NewServiceRoutes(serviceRepo model.ServiceRepository, taskScheduler *task.S
 // @Failure 400,404,409,422,500
 // @Success 201
 // @Router /v1/services [post]
-func (lr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
+func (sr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
 	var createServiceRequest *model.CreateServiceRequest
 	if err := ctx.BodyParser(&createServiceRequest); err != nil {
 		log.Debug().Err(err).Msg("failed to parse the request as service")
@@ -37,20 +37,20 @@ func (lr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
 	if err := validator.New().Struct(createServiceRequest); err != nil {
 		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
 	}
-	exists := lr.serviceRepo.ExistsByURL(createServiceRequest.URL)
+	exists := sr.serviceRepo.ExistsByURL(createServiceRequest.URL)
 	if exists {
 		log.Debug().Msgf("a service for url %s is already registered", createServiceRequest.URL)
 		return ctx.
 			Status(http.StatusConflict).
 			JSON(map[string]string{"error": fmt.Sprintf("A service for url %s is already registered", createServiceRequest.URL)})
 	}
-	ID, err := lr.serviceRepo.Create(createServiceRequest.ToPersistentService())
+	ID, err := sr.serviceRepo.Create(createServiceRequest.ToPersistentService())
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create a service")
 		return ctx.SendStatus(http.StatusInternalServerError)
 	}
 	taskConfig := task.Config{ID: int64(ID), Name: createServiceRequest.Name, URL: createServiceRequest.URL, Timeout: createServiceRequest.CheckIntervalSeconds}
-	err = lr.taskScheduler.Update(taskConfig, createServiceRequest.CheckIntervalSeconds)
+	err = sr.taskScheduler.Update(taskConfig, createServiceRequest.CheckIntervalSeconds)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update the task scheduler")
 		return ctx.SendStatus(http.StatusInternalServerError)
@@ -64,8 +64,8 @@ func (lr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
 // @Failure 404
 // @Success 200
 // @Router /v1/services [get]
-func (lr *ServiceRoutes) GetAllServices(ctx *fiber.Ctx) error {
-	services, err := lr.serviceRepo.GetAll()
+func (sr *ServiceRoutes) GetAllServices(ctx *fiber.Ctx) error {
+	services, err := sr.serviceRepo.GetAll()
 	if err != nil {
 		log.Debug().Err(err).Msg("failed to fetch all services")
 		return ctx.SendStatus(http.StatusNotFound)
@@ -79,15 +79,40 @@ func (lr *ServiceRoutes) GetAllServices(ctx *fiber.Ctx) error {
 // @Failure 404
 // @Success 200
 // @Router /v1/services/{id} [get]
-func (lr *ServiceRoutes) GetById(ctx *fiber.Ctx) error {
+func (sr *ServiceRoutes) GetById(ctx *fiber.Ctx) error {
 	id, err := ctx.ParamsInt("id")
 	if err != nil {
 		return ctx.SendStatus(http.StatusBadRequest)
 	}
-	service, err := lr.serviceRepo.GetById(model.ServiceID(id))
+	service, err := sr.serviceRepo.GetById(model.ServiceID(id))
 	if err != nil {
 		log.Debug().Err(err).Msgf("failed to a service for id %d services", id)
 		return ctx.SendStatus(http.StatusNotFound)
 	}
 	return ctx.Status(http.StatusOK).JSON(service)
+}
+
+// DeleteById godoc
+// @Summary Delete a service
+// @Produce json
+// @Param id path string true "Service ID"
+// @Failure 400,404
+// @Success 204
+// @Router /v1/services/{id} [delete]
+func (sr *ServiceRoutes) DeleteById(ctx *fiber.Ctx) error {
+	id, err := ctx.ParamsInt("id")
+	if err != nil {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+	err = sr.serviceRepo.DeleteById(model.ServiceID(id))
+	if err != nil {
+		log.Debug().Err(err).Msg("failed to delete the service. not found.")
+		return ctx.SendStatus(http.StatusNotFound)
+	}
+	err = sr.taskScheduler.Remove(int64(id))
+	if err != nil {
+		log.Debug().Err(err).Msgf("failed to remove task with id %d.", id)
+		return ctx.SendStatus(http.StatusInternalServerError)
+	}
+	return ctx.SendStatus(http.StatusNoContent)
 }

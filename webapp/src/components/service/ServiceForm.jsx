@@ -21,10 +21,12 @@ const ServiceForm = () => {
     initialValues: initialFormValues,
     onSubmit: async (values) => {
       if (!service) {
-        await axios.post(
-          `${process.env.REACT_APP_BASE_API_URL}/v1/services`,
-          values,
-        );
+          try {
+            await axios.post(`/v1/services`, values);
+            formik.resetForm();
+          } catch (e) {
+            console.error(e)
+          }
       }
     },
   });
@@ -34,7 +36,7 @@ const ServiceForm = () => {
       (async () => {
         try {
           const { data } = await axios.get(
-            `${process.env.REACT_APP_BASE_API_URL}/v1/services/${id}`,
+            `/v1/services/${id}`,
           );
           setService(data);
         } catch (e) {

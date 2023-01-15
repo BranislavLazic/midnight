@@ -34,3 +34,11 @@ func (psr *ServiceRepository) ExistsByURL(URL string) bool {
 	var service *model.Service
 	return psr.db.First(&service, "url = ?", URL).Error == nil
 }
+
+func (psr *ServiceRepository) DeleteById(ID model.ServiceID) error {
+	service, err := psr.GetById(ID)
+	if err != nil {
+		return err
+	}
+	return psr.db.Delete(&service, ID).Error
+}
