@@ -7,6 +7,7 @@ require (
 	github.com/go-co-op/gocron v1.18.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gofiber/fiber/v2 v2.41.0
+	github.com/joho/godotenv v1.4.0
 	github.com/pressly/goose/v3 v3.7.0
 	github.com/rs/zerolog v1.28.0
 	github.com/swaggo/fiber-swagger v1.3.0

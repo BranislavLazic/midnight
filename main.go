@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"github.com/branislavlazic/midnight/config"
 	"time"
 
 	"github.com/branislavlazic/midnight/db"
@@ -25,11 +26,15 @@ var indexFile embed.FS
 var dbMigrations embed.FS
 
 func main() {
+	cfg, err := config.GetAppConfig()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to read config")
+	}
 	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize cache")
 	}
-	pgDb, err := db.GetPGDBPool("localhost", "postgres", "postgres", "midnight", 5432)
+	pgDb, err := db.GetPGDBPool(cfg.DbHost, cfg.DbUser, cfg.DbPassword, cfg.DbName, cfg.DbPort)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize database")
 	}
@@ -44,10 +49,10 @@ func main() {
 	taskScheduler := task.NewScheduler(scheduler, taskProvider, serviceRepo)
 	err = taskScheduler.RunAll()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to initialize scheduler")
+		log.Fatal().Err(err).Msg("failed to initialize task scheduler")
 	}
 
-	err = api.InitRouter(8000, cache, serviceRepo, taskScheduler, indexFile, uiStaticFiles)
+	err = api.StartServer(cfg.AppPort, cache, serviceRepo, taskScheduler, indexFile, uiStaticFiles)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start the server")
 	}

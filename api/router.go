@@ -17,7 +17,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 )
 
-func InitRouter(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRepository, taskScheduler *task.Scheduler, indexFile embed.FS, staticFiles embed.FS) error {
+func StartServer(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRepository, taskScheduler *task.Scheduler, indexFile embed.FS, staticFiles embed.FS) error {
 	serviceStatusRoutes := NewServiceStatusRoutes(cache)
 	serviceRoutes := NewServiceRoutes(serviceRepo, taskScheduler)
 
@@ -28,6 +28,7 @@ func InitRouter(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRep
 		AllowHeaders:     "Origin, Content-Type, Accept, Accept-Language, Content-Length",
 	}))
 
+	// API routes
 	app.Get("/v1/status", serviceStatusRoutes.GetStatus)
 	app.Post("/v1/services", serviceRoutes.CreateService)
 	app.Get("/v1/services", serviceRoutes.GetAllServices)
@@ -51,7 +52,7 @@ func InitRouter(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRep
 		Root: http.FS(indexSubDir),
 	}))
 
-	// Start
+	// Start server
 	err := app.Listen(fmt.Sprintf(":%d", port))
 	if err != nil {
 		return err
