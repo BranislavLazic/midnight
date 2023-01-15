@@ -19,7 +19,7 @@ const StatusTable = () => {
 
   return (
     <div className="flex justify-center p-4 min-h-screen overflow-hidden bg-white dark:bg-gray-900">
-      <div className="min-w-[50%]">
+      <div className="min-w-[64rem]">
         <Table>
           <Table.Head>
             <Table.HeadCell>Service</Table.HeadCell>
@@ -38,7 +38,9 @@ const StatusTable = () => {
                   </a>
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                  <Badge color={l.statusCode < 400 ? "success" : "failure"}>{l.status}</Badge>
+                  <Badge color={l.statusCode < 400 ? 'success' : 'failure'}>
+                    {l.status}
+                  </Badge>
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   {l?.version}

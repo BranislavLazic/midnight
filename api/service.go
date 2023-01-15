@@ -2,13 +2,14 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/branislavlazic/midnight/api/validation"
 	"github.com/branislavlazic/midnight/model"
 	"github.com/branislavlazic/midnight/task"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 type ServiceRoutes struct {
@@ -56,4 +57,18 @@ func (lr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
 	}
 	ctx.Set("Location", string(ctx.Request().Host())+ctx.Route().Path+"/"+fmt.Sprintf("%d", ID))
 	return ctx.SendStatus(http.StatusCreated)
+}
+
+// GetAllServices godoc
+// @Summary Get all services
+// @Failure 404
+// @Success 200
+// @Router /v1/services [get]
+func (lr *ServiceRoutes) GetAllServices(ctx *fiber.Ctx) error {
+	services, err := lr.serviceRepo.GetAll()
+	if err != nil {
+		log.Debug().Err(err).Msg("failed to fetch all services")
+		ctx.SendStatus(http.StatusNotFound)
+	}
+	return ctx.Status(http.StatusOK).JSON(services)
 }

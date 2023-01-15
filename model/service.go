@@ -5,10 +5,10 @@ import "strings"
 type ServiceID int64
 
 type Service struct {
-	ID                   ServiceID `gorm:"primaryKey;autoIncrement"`
-	Name                 string    `gorm:"type:VARCHAR(255)"`
-	URL                  string
-	CheckIntervalSeconds int
+	ID                   ServiceID `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name                 string    `gorm:"type:VARCHAR(255)" json:"name"`
+	URL                  string    `json:"url"`
+	CheckIntervalSeconds int       `json:"checkIntervalSeconds"`
 }
 
 type CreateServiceRequest struct {
