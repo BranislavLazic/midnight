@@ -29,9 +29,10 @@ func StartServer(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRe
 
 	// API routes
 	app.Get("/v1/status", serviceStatusRoutes.GetStatus)
-	app.Post("/v1/services", serviceRoutes.CreateService)
 	app.Get("/v1/services", serviceRoutes.GetAllServices)
 	app.Get("/v1/services/:id", serviceRoutes.GetById)
+	app.Post("/v1/services", serviceRoutes.CreateService)
+	app.Put("/v1/services/:id", serviceRoutes.UpdateService)
 	app.Delete("/v1/services/:id", serviceRoutes.DeleteById)
 
 	// Swagger

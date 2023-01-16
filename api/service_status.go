@@ -25,7 +25,7 @@ func NewServiceStatusRoutes(cache *bigcache.BigCache) *ServiceStatusRoutes {
 func (lr *ServiceStatusRoutes) GetStatus(ctx *fiber.Ctx) error {
 	bytes, err := lr.cache.Get(task.ServiceStatusCacheName)
 	if err != nil {
-		return ctx.SendStatus(http.StatusNotFound)
+		return ctx.Status(http.StatusOK).JSON([]task.ServiceStatus{})
 	}
 	serviceStatuses, err := sortServiceStatuses(bytes)
 	if err != nil {
@@ -45,7 +45,7 @@ func sortServiceStatuses(bytes []byte) ([]task.ServiceStatus, error) {
 		keys = append(keys, k)
 	}
 	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
-	var serviceStatuses []task.ServiceStatus
+	serviceStatuses := []task.ServiceStatus{}
 	for _, key := range keys {
 		serviceStatuses = append(serviceStatuses, serviceStatusesMap[key])
 	}

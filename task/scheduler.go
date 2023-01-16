@@ -41,9 +41,9 @@ func (s *Scheduler) RunAll() error {
 	return nil
 }
 
-// Update updates the scheduler with a new job
+// Add updates the scheduler with a new job
 // that was provided through a task configuration.
-func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
+func (s *Scheduler) Add(cfg Config, checkIntervalSeconds int) error {
 	job, err := s.scheduler.Every(checkIntervalSeconds).
 		Tag(strconv.FormatInt(cfg.ID, 10)).
 		Seconds().
@@ -56,6 +56,14 @@ func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
+	err := s.Remove(cfg.ID)
+	if err != nil {
+		return err
+	}
+	return s.Add(cfg, checkIntervalSeconds)
 }
 
 // Remove removes the task from the cache by its id

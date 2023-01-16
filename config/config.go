@@ -1,8 +1,6 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -19,43 +17,28 @@ type AppConfig struct {
 	EnableSwagger bool
 }
 
-func GetAppConfig() (*AppConfig, error) {
+func GetAppConfig() *AppConfig {
 	if err := godotenv.Load(); err != nil {
 		log.Logger.Warn().Msg(".env file not found. proceeding with environment variables.")
 	}
 	appPort := lookupEnvWithDefault("PORT", "8000")
 	appPortNumeric, err := strconv.Atoi(appPort)
 	if err != nil {
-		return nil, err
+		log.Fatal().Msgf("failed to convert %s to numeric value", appPort)
 	}
-	dbHost, err := lookupMandatoryEnv("DB_HOST")
-	if err != nil {
-		return nil, err
-	}
-	dbPort, err := lookupMandatoryEnv("DB_PORT")
-	if err != nil {
-		return nil, err
-	}
+	dbHost := lookupMandatoryEnv("DB_HOST")
+	dbPort := lookupMandatoryEnv("DB_PORT")
 	dbPortNumeric, err := strconv.Atoi(dbPort)
 	if err != nil {
-		return nil, err
+		log.Fatal().Msgf("failed to convert %s to numeric value", dbPort)
 	}
-	dbUser, err := lookupMandatoryEnv("DB_USER")
-	if err != nil {
-		return nil, err
-	}
-	dbPassword, err := lookupMandatoryEnv("DB_PASSWORD")
-	if err != nil {
-		return nil, err
-	}
-	dbName, err := lookupMandatoryEnv("DB_NAME")
-	if err != nil {
-		return nil, err
-	}
+	dbUser := lookupMandatoryEnv("DB_USER")
+	dbPassword := lookupMandatoryEnv("DB_PASSWORD")
+	dbName := lookupMandatoryEnv("DB_NAME")
 	enableSwagger := lookupEnvWithDefault("ENABLE_SWAGGER", "false")
 	enableSwaggerBool, err := strconv.ParseBool(enableSwagger)
 	if err != nil {
-		return nil, err
+		log.Fatal().Msgf("failed to convert %s to boolean value", enableSwagger)
 	}
 	return &AppConfig{
 		AppPort:       appPortNumeric,
@@ -65,7 +48,7 @@ func GetAppConfig() (*AppConfig, error) {
 		DbPassword:    dbPassword,
 		DbName:        dbName,
 		EnableSwagger: enableSwaggerBool,
-	}, nil
+	}
 
 }
 
@@ -77,10 +60,10 @@ func lookupEnvWithDefault(env, defaultValue string) string {
 	return value
 }
 
-func lookupMandatoryEnv(env string) (string, error) {
+func lookupMandatoryEnv(env string) string {
 	value, ok := os.LookupEnv(env)
 	if !ok {
-		return "", errors.New(fmt.Sprintf("%s environment variable must be provided.", env))
+		log.Fatal().Msgf("failed to read a mandatory %s env. variable", env)
 	}
-	return value, nil
+	return value
 }

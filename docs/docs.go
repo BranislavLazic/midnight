@@ -32,12 +32,12 @@ const docTemplate = `{
                 "summary": "Create a service",
                 "parameters": [
                     {
-                        "description": "Create service request body",
-                        "name": "createServiceRequest",
+                        "description": "Service request body",
+                        "name": "serviceRequest",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CreateServiceRequest"
+                            "$ref": "#/definitions/model.ServiceRequest"
                         }
                     }
                 ],
@@ -84,6 +84,37 @@ const docTemplate = `{
                     }
                 }
             },
+            "post": {
+                "summary": "Update a service",
+                "parameters": [
+                    {
+                        "description": "Service request body",
+                        "name": "serviceRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ServiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
             "delete": {
                 "produces": [
                     "application/json"
@@ -126,7 +157,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.CreateServiceRequest": {
+        "model.ServiceRequest": {
             "type": "object",
             "required": [
                 "checkIntervalSeconds",

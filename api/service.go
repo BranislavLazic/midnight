@@ -23,40 +23,73 @@ func NewServiceRoutes(serviceRepo model.ServiceRepository, taskScheduler *task.S
 
 // CreateService godoc
 // @Summary Create a service
-// @Param createServiceRequest body model.CreateServiceRequest true "Create service request body"
+// @Param serviceRequest body model.ServiceRequest true "Service request body"
 // @Failure 400,404,409,422,500
 // @Success 201
 // @Router /v1/services [post]
 func (sr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
-	var createServiceRequest *model.CreateServiceRequest
-	if err := ctx.BodyParser(&createServiceRequest); err != nil {
+	var serviceRequest *model.ServiceRequest
+	if err := ctx.BodyParser(&serviceRequest); err != nil {
 		log.Debug().Err(err).Msg("failed to parse the request as service")
 		return ctx.SendStatus(http.StatusBadRequest)
 	}
-	createServiceRequest.Sanitize()
-	if err := validator.New().Struct(createServiceRequest); err != nil {
+	serviceRequest.Sanitize()
+	if err := validator.New().Struct(serviceRequest); err != nil {
 		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
 	}
-	exists := sr.serviceRepo.ExistsByURL(createServiceRequest.URL)
+	exists := sr.serviceRepo.ExistsByURL(serviceRequest.URL)
 	if exists {
-		log.Debug().Msgf("a service for url %s is already registered", createServiceRequest.URL)
+		log.Debug().Msgf("a service for url %s is already registered", serviceRequest.URL)
 		return ctx.
 			Status(http.StatusConflict).
-			JSON(map[string]string{"error": fmt.Sprintf("A service for url %s is already registered", createServiceRequest.URL)})
+			JSON(map[string]string{"error": fmt.Sprintf("A service for url %s is already registered", serviceRequest.URL)})
 	}
-	ID, err := sr.serviceRepo.Create(createServiceRequest.ToPersistentService())
+	ID, err := sr.serviceRepo.Create(serviceRequest.ToPersistentService(0))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create a service")
 		return ctx.SendStatus(http.StatusInternalServerError)
 	}
-	taskConfig := task.Config{ID: int64(ID), Name: createServiceRequest.Name, URL: createServiceRequest.URL, Timeout: createServiceRequest.CheckIntervalSeconds}
-	err = sr.taskScheduler.Update(taskConfig, createServiceRequest.CheckIntervalSeconds)
+	taskConfig := task.Config{ID: int64(ID), Name: serviceRequest.Name, URL: serviceRequest.URL, Timeout: serviceRequest.CheckIntervalSeconds}
+	err = sr.taskScheduler.Add(taskConfig, serviceRequest.CheckIntervalSeconds)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to update the task scheduler")
+		log.Error().Err(err).Msg("failed to add the task")
 		return ctx.SendStatus(http.StatusInternalServerError)
 	}
 	ctx.Set("Location", string(ctx.Request().Host())+ctx.Route().Path+"/"+fmt.Sprintf("%d", ID))
 	return ctx.SendStatus(http.StatusCreated)
+}
+
+// UpdateService godoc
+// @Summary Update a service
+// @Param serviceRequest body model.ServiceRequest true "Service request body"
+// @Failure 400,404,422,500
+// @Success 200
+// @Router /v1/services/{id} [post]
+func (sr *ServiceRoutes) UpdateService(ctx *fiber.Ctx) error {
+	ID, err := ctx.ParamsInt("id")
+	if err != nil {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+	var serviceRequest *model.ServiceRequest
+	if err := ctx.BodyParser(&serviceRequest); err != nil {
+		log.Debug().Err(err).Msg("failed to parse the request as service")
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+	serviceRequest.Sanitize()
+	if err := validator.New().Struct(serviceRequest); err != nil {
+		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
+	}
+	err = sr.serviceRepo.Update(serviceRequest.ToPersistentService(model.ServiceID(ID)))
+	if err != nil {
+		return ctx.SendStatus(http.StatusInternalServerError)
+	}
+	taskConfig := task.Config{ID: int64(ID), Name: serviceRequest.Name, URL: serviceRequest.URL, Timeout: serviceRequest.CheckIntervalSeconds}
+	err = sr.taskScheduler.Update(taskConfig, serviceRequest.CheckIntervalSeconds)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to update the task scheduler")
+		return ctx.SendStatus(http.StatusInternalServerError)
+	}
+	return ctx.SendStatus(http.StatusOK)
 }
 
 // GetAllServices godoc

@@ -26,10 +26,7 @@ var indexFile embed.FS
 var dbMigrations embed.FS
 
 func main() {
-	cfg, err := config.GetAppConfig()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to read config")
-	}
+	cfg := config.GetAppConfig()
 	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize cache")

@@ -18,6 +18,10 @@ func (psr *ServiceRepository) Create(service *model.Service) (model.ServiceID, e
 	return service.ID, resp.Error
 }
 
+func (psr *ServiceRepository) Update(service *model.Service) error {
+	return psr.db.Save(&service).Error
+}
+
 func (psr *ServiceRepository) GetAll() ([]model.Service, error) {
 	services := make([]model.Service, 0)
 	resp := psr.db.Order("id desc").Find(&services)

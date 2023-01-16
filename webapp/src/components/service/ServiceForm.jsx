@@ -20,13 +20,15 @@ const ServiceForm = () => {
     validationSchema: validationSchema,
     initialValues: initialFormValues,
     onSubmit: async (values) => {
-      if (!service) {
-          try {
-            await axios.post(`/v1/services`, values);
-            formik.resetForm();
-          } catch (e) {
-            console.error(e)
-          }
+      try {
+        if (!service) {
+          await axios.post(`/v1/services`, values);
+          formik.resetForm();
+        } else {
+          await axios.put(`/v1/services/${id}`, values);
+        }
+      } catch (e) {
+        console.error(e);
       }
     },
   });
@@ -35,10 +37,9 @@ const ServiceForm = () => {
     if (id) {
       (async () => {
         try {
-          const { data } = await axios.get(
-            `/v1/services/${id}`,
-          );
+          const { data } = await axios.get(`/v1/services/${id}`);
           setService(data);
+          await formik.setValues(data)
         } catch (e) {
           console.error(e);
         }

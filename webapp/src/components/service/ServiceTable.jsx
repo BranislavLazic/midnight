@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Button, Table } from 'flowbite-react';
-import {PencilIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/solid';
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
 
 const ServiceTable = () => {
   const [services, setServices] = useState([]);
@@ -26,7 +26,7 @@ const ServiceTable = () => {
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
   return (
     <div className="flex grow">
@@ -36,7 +36,7 @@ const ServiceTable = () => {
           <Link to="/dashboard/services">
             <Button>
               <div className="flex gap-1 items-center">
-                <PlusIcon className="h-4 w-4 stroke-2"/>
+                <PlusIcon className="h-4 w-4 stroke-2" />
                 <span>Add</span>
               </div>
             </Button>

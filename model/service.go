@@ -11,27 +11,29 @@ type Service struct {
 	CheckIntervalSeconds int       `json:"checkIntervalSeconds"`
 }
 
-type CreateServiceRequest struct {
+type ServiceRequest struct {
 	Name                 string `json:"name" validate:"max=255"`
 	URL                  string `json:"url" validate:"required,max=4096"`
 	CheckIntervalSeconds int    `json:"checkIntervalSeconds" validate:"required,max=1000000"`
 }
 
-func (csr *CreateServiceRequest) Sanitize() {
-	csr.Name = strings.TrimSpace(csr.Name)
-	csr.URL = strings.TrimSpace(csr.URL)
+func (sr *ServiceRequest) Sanitize() {
+	sr.Name = strings.TrimSpace(sr.Name)
+	sr.URL = strings.TrimSpace(sr.URL)
 }
 
-func (csr *CreateServiceRequest) ToPersistentService() *Service {
+func (sr *ServiceRequest) ToPersistentService(ID ServiceID) *Service {
 	return &Service{
-		Name:                 csr.Name,
-		URL:                  csr.URL,
-		CheckIntervalSeconds: csr.CheckIntervalSeconds,
+		ID:                   ID,
+		Name:                 sr.Name,
+		URL:                  sr.URL,
+		CheckIntervalSeconds: sr.CheckIntervalSeconds,
 	}
 }
 
 type ServiceRepository interface {
 	Create(service *Service) (ServiceID, error)
+	Update(service *Service) error
 	GetAll() ([]Service, error)
 	GetById(ID ServiceID) (*Service, error)
 	DeleteById(ID ServiceID) error

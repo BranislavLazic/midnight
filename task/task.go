@@ -66,7 +66,7 @@ func (tp *Provider) NewTask(config Config) func() {
 			var serviceStatusResponse ServiceStatusResponse
 			err := json.NewDecoder(res.Body).Decode(&serviceStatusResponse)
 			if err != nil {
-				log.Debug().Err(err).Msg("failed to extract the request body")
+				//log.Debug().Err(err).Msg("failed to extract the request body")
 			}
 			err = tp.saveServiceStatus(
 				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Version: serviceStatusResponse.Version, Status: res.Status, StatusCode: res.StatusCode},
