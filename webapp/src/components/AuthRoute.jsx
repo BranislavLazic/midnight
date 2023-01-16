@@ -1,12 +1,8 @@
-import { Navigate, Route } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
-const AuthRoute = ({ path, element }) => {
+const AuthRoute = () => {
   const isAuthenticated = localStorage.getItem('authUser');
-  return isAuthenticated ? (
-    <Route path={path} element={element} />
-  ) : (
-    <Navigate to="/login" />
-  );
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
 };
 
 export default AuthRoute;

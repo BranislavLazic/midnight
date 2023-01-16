@@ -16,7 +16,7 @@ const LoginPage = () => {
         email,
         password,
       });
-      localStorage.setItem('authUser', data);
+      localStorage.setItem('authUser', JSON.stringify(data));
       navigate('/dashboard');
     } catch (e) {
       console.error(e);

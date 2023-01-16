@@ -40,9 +40,11 @@ func main() {
 		log.Logger.Fatal().Err(err).Msg("failed to run the migrations")
 	}
 
+	serviceRepo := postgres.NewServiceRepository(pgDb)
+	userRepo := postgres.NewUserRepository(pgDb)
+
 	scheduler := gocron.NewScheduler(time.UTC)
 	taskProvider := task.NewProvider(cache)
-	serviceRepo := postgres.NewPgServiceRepository(pgDb)
 	taskScheduler := task.NewScheduler(scheduler, taskProvider, serviceRepo)
 	err = taskScheduler.RunAll()
 	if err != nil {
@@ -53,7 +55,9 @@ func main() {
 		Port:          cfg.AppPort,
 		Cache:         cache,
 		ServiceRepo:   serviceRepo,
+		UserRepo:      userRepo,
 		TaskScheduler: taskScheduler,
+		SessionSecret: "secret",
 		IndexFile:     indexFile,
 		StaticFiles:   uiStaticFiles,
 	}

@@ -5,6 +5,7 @@ import Dashboard from './pages/dashboard/Dashboard.jsx';
 import ServiceTable from './components/service/ServiceTable.jsx';
 import ServiceForm from './components/service/ServiceForm.jsx';
 import LoginPage from './pages/login/LoginPage.jsx';
+import AuthRoute from './components/AuthRoute.jsx';
 
 const browserHistory = createBrowserHistory();
 
@@ -14,14 +15,17 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <Dashboard>
-              <ServiceTable />
-            </Dashboard>
-          }
-        />
+        <Route exact path="/dashboard" element={<AuthRoute />}>
+          <Route
+            exact
+            path="/dashboard"
+            element={
+              <Dashboard>
+                <ServiceTable />
+              </Dashboard>
+            }
+          />
+        </Route>
         <Route
           path="/dashboard/services/:id"
           element={

@@ -119,7 +119,7 @@ func (sr *ServiceRoutes) GetById(ctx *fiber.Ctx) error {
 	}
 	service, err := sr.serviceRepo.GetById(model.ServiceID(id))
 	if err != nil {
-		log.Debug().Err(err).Msgf("failed to a service for id %d services", id)
+		log.Debug().Err(err).Msgf("failed to find a service by id %d", id)
 		return ctx.SendStatus(http.StatusNotFound)
 	}
 	return ctx.Status(http.StatusOK).JSON(service)
