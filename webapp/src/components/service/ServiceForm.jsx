@@ -1,9 +1,10 @@
 import { Label, TextInput, Button } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { validationSchema } from './validation/validation';
+import { BASE_URL } from '../../../constants.cjs';
 
 const initialFormValues = {
   name: '',
@@ -13,6 +14,7 @@ const initialFormValues = {
 
 const ServiceForm = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [service, setService] = useState();
 
   const formik = useFormik({
@@ -22,10 +24,11 @@ const ServiceForm = () => {
     onSubmit: async (values) => {
       try {
         if (!service) {
-          await axios.post(`/v1/services`, values);
+          await axios.post(`${BASE_URL}/v1/services`, values);
           formik.resetForm();
         } else {
-          await axios.put(`/v1/services/${id}`, values);
+          await axios.put(`${BASE_URL}/v1/services/${id}`, values);
+          navigate('/dashboard');
         }
       } catch (e) {
         console.error(e);
@@ -37,9 +40,9 @@ const ServiceForm = () => {
     if (id) {
       (async () => {
         try {
-          const { data } = await axios.get(`/v1/services/${id}`);
+          const { data } = await axios.get(`${BASE_URL}/v1/services/${id}`);
           setService(data);
-          await formik.setValues(data)
+          await formik.setValues(data);
         } catch (e) {
           console.error(e);
         }

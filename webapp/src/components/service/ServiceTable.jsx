@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Button, Table } from 'flowbite-react';
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { BASE_URL } from '../../../constants.cjs';
 
 const ServiceTable = () => {
   const [services, setServices] = useState([]);
@@ -10,7 +11,7 @@ const ServiceTable = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axios.get('http://localhost:8000/v1/services');
+        const { data } = await axios.get(`${BASE_URL}/v1/services`);
         setServices(data);
       } catch (e) {
         console.error(e);
@@ -20,8 +21,8 @@ const ServiceTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/v1/services/${id}`);
-      const { data } = await axios.get('http://localhost:8000/v1/services');
+      await axios.delete(`${BASE_URL}/v1/services/${id}`);
+      const { data } = await axios.get(`${BASE_URL}/v1/services`);
       setServices(data);
     } catch (e) {
       console.error(e);
@@ -32,7 +33,7 @@ const ServiceTable = () => {
     <div className="flex grow">
       <div className="flex flex-col gap-4 min-w-full p-4 dark:bg-gray-800 rounded">
         <div className="flex flex-row justify-between items-center">
-          <h1 className="text-lg dark:text-white">Services</h1>
+          <h1 className="text-lg font-bold dark:text-white">Services</h1>
           <Link to="/dashboard/services">
             <Button>
               <div className="flex gap-1 items-center">

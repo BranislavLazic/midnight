@@ -2,6 +2,7 @@ import { Badge, Table } from 'flowbite-react';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
+import { BASE_URL } from '../../constants.cjs';
 
 const StatusTable = () => {
   const [serviceStatuses, setServiceStatuses] = useState([]);
@@ -9,7 +10,7 @@ const StatusTable = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axios.get('http://localhost:8000/v1/status');
+        const { data } = await axios.get(`${BASE_URL}/v1/status`);
         setServiceStatuses(data);
       } catch (e) {
         console.error(e);
@@ -18,7 +19,7 @@ const StatusTable = () => {
   }, []);
 
   return (
-    <div className="flex justify-center p-4 min-h-screen overflow-hidden bg-white dark:bg-gray-900">
+    <div className="flex justify-center w-full p-4 min-h-screen overflow-hidden bg-white dark:bg-gray-900">
       <div className="w-full">
         <Table>
           <Table.Head>

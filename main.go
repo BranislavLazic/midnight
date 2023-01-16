@@ -49,7 +49,15 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to initialize task scheduler")
 	}
 
-	err = api.StartServer(cfg.AppPort, cache, serviceRepo, taskScheduler, indexFile, uiStaticFiles)
+	serverSettings := api.ServerSettings{
+		Port:          cfg.AppPort,
+		Cache:         cache,
+		ServiceRepo:   serviceRepo,
+		TaskScheduler: taskScheduler,
+		IndexFile:     indexFile,
+		StaticFiles:   uiStaticFiles,
+	}
+	err = api.StartServer(serverSettings)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start the server")
 	}

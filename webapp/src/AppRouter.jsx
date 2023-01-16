@@ -4,6 +4,7 @@ import StatusPage from './pages/status/StatusPage.jsx';
 import Dashboard from './pages/dashboard/Dashboard.jsx';
 import ServiceTable from './components/service/ServiceTable.jsx';
 import ServiceForm from './components/service/ServiceForm.jsx';
+import LoginPage from './pages/login/LoginPage.jsx';
 
 const browserHistory = createBrowserHistory();
 
@@ -12,6 +13,7 @@ const AppRouter = () => {
     <Router history={browserHistory}>
       <Routes>
         <Route path="/" element={<StatusPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route
           path="/dashboard"
           element={

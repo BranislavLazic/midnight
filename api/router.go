@@ -3,11 +3,11 @@ package api
 import (
 	"embed"
 	"fmt"
+	"github.com/branislavlazic/midnight/cache"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"io/fs"
 	"net/http"
 
-	"github.com/allegro/bigcache/v3"
 	_ "github.com/branislavlazic/midnight/docs"
 	"github.com/branislavlazic/midnight/model"
 	"github.com/branislavlazic/midnight/task"
@@ -16,9 +16,18 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 )
 
-func StartServer(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRepository, taskScheduler *task.Scheduler, indexFile embed.FS, staticFiles embed.FS) error {
-	serviceStatusRoutes := NewServiceStatusRoutes(cache)
-	serviceRoutes := NewServiceRoutes(serviceRepo, taskScheduler)
+type ServerSettings struct {
+	Port          int
+	Cache         cache.Internal
+	ServiceRepo   model.ServiceRepository
+	TaskScheduler *task.Scheduler
+	IndexFile     embed.FS
+	StaticFiles   embed.FS
+}
+
+func StartServer(settings ServerSettings) error {
+	serviceStatusRoutes := NewServiceStatusRoutes(settings.Cache)
+	serviceRoutes := NewServiceRoutes(settings.ServiceRepo, settings.TaskScheduler)
 
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
@@ -39,8 +48,8 @@ func StartServer(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRe
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
 	// Webapp static files
-	assetsSubDir, _ := fs.Sub(staticFiles, "webapp/dist")
-	indexSubDir, _ := fs.Sub(indexFile, "webapp/dist")
+	assetsSubDir, _ := fs.Sub(settings.StaticFiles, "webapp/dist")
+	indexSubDir, _ := fs.Sub(settings.IndexFile, "webapp/dist")
 	assetsFileDir := filesystem.New(filesystem.Config{
 		Root: http.FS(assetsSubDir),
 	})
@@ -49,12 +58,12 @@ func StartServer(port int, cache *bigcache.BigCache, serviceRepo model.ServiceRe
 	// Serve svg logo
 	app.Get("/*.svg", assetsFileDir)
 	// Serve index.html
-
 	app.Get("/*", func(ctx *fiber.Ctx) error {
-		return filesystem.SendFile(ctx, http.FS(indexSubDir), "/")
+		return filesystem.SendFile(ctx, http.FS(indexSubDir), "/index.html")
 	})
+
 	// Start server
-	err := app.Listen(fmt.Sprintf(":%d", port))
+	err := app.Listen(fmt.Sprintf(":%d", settings.Port))
 	if err != nil {
 		return err
 	}

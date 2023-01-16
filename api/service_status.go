@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/allegro/bigcache/v3"
+	"github.com/branislavlazic/midnight/cache"
 	"github.com/branislavlazic/midnight/task"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
@@ -10,10 +10,10 @@ import (
 )
 
 type ServiceStatusRoutes struct {
-	cache *bigcache.BigCache
+	cache cache.Internal
 }
 
-func NewServiceStatusRoutes(cache *bigcache.BigCache) *ServiceStatusRoutes {
+func NewServiceStatusRoutes(cache cache.Internal) *ServiceStatusRoutes {
 	return &ServiceStatusRoutes{cache: cache}
 }
 
