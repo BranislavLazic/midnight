@@ -17,6 +17,8 @@ func NewScheduler(scheduler *gocron.Scheduler, taskProvider *Provider, serviceRe
 	return &Scheduler{scheduler: scheduler, taskProvider: taskProvider, serviceRepo: serviceRepo}
 }
 
+// RunAll reads services settings, creates task configurations,
+// spawns jobs, and runs the scheduler in the end.
 func (s *Scheduler) RunAll() error {
 	services, err := s.serviceRepo.GetAll()
 	if err != nil {
@@ -39,6 +41,8 @@ func (s *Scheduler) RunAll() error {
 	return nil
 }
 
+// Update updates the scheduler with a new job
+// that was provided through a task configuration.
 func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
 	job, err := s.scheduler.Every(checkIntervalSeconds).
 		Tag(strconv.FormatInt(cfg.ID, 10)).
@@ -54,6 +58,8 @@ func (s *Scheduler) Update(cfg Config, checkIntervalSeconds int) error {
 	return nil
 }
 
+// Remove removes the task from the cache by its id
+// and removes its job from the scheduler.
 func (s *Scheduler) Remove(ID int64) error {
 	_ = s.taskProvider.RemoveTask(ID)
 	return s.scheduler.RemoveByTag(strconv.FormatInt(ID, 10))

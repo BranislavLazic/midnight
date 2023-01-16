@@ -19,7 +19,7 @@ const StatusTable = () => {
 
   return (
     <div className="flex justify-center p-4 min-h-screen overflow-hidden bg-white dark:bg-gray-900">
-      <div className="min-w-[64rem]">
+      <div className="w-full">
         <Table>
           <Table.Head>
             <Table.HeadCell>Service</Table.HeadCell>

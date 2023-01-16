@@ -67,11 +67,11 @@ const ServiceTable = () => {
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white flex gap-2">
                   <Link to={`/dashboard/services/${s.id}`}>
                     <Button color="gray">
-                      <PencilIcon className="h-4 w-4" />
+                      <PencilIcon className="h-4 w-4 stroke-2" />
                     </Button>
                   </Link>
                   <Button color="gray" onClick={() => handleDelete(s.id)}>
-                    <TrashIcon className="h-4 w-4" />
+                    <TrashIcon className="h-4 w-4 stroke-2" />
                   </Button>
                 </Table.Cell>
               </Table.Row>
