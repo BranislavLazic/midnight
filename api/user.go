@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"time"
 )
 
 type UserRoutes struct {
@@ -56,4 +57,26 @@ func (ur *UserRoutes) Login(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(http.StatusInternalServerError)
 	}
 	return ctx.Status(http.StatusOK).JSON(user)
+}
+
+// Logout godoc
+// @Summary Logout
+// @Failure 500
+// @Success 200
+// @Router /v1/logout [post]
+func (ur *UserRoutes) Logout(ctx *fiber.Ctx) error {
+	err := ur.sessionStore.Reset()
+	if err != nil {
+		log.Error().Err(err).Msgf("failed to remove the session")
+		return ctx.SendStatus(http.StatusInternalServerError)
+	}
+	expireCookie(ctx)
+	return ctx.SendStatus(http.StatusOK)
+}
+
+func expireCookie(ctx *fiber.Ctx) {
+	cookie := new(fiber.Cookie)
+	cookie.Name = secureSession.SecureCookieName
+	cookie.Expires = time.Now().Add(-3 * time.Second)
+	ctx.Cookie(cookie)
 }

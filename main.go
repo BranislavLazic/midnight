@@ -50,14 +50,12 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize task scheduler")
 	}
-
 	serverSettings := api.ServerSettings{
-		Port:          cfg.AppPort,
+		Config:        cfg,
 		Cache:         cache,
 		ServiceRepo:   serviceRepo,
 		UserRepo:      userRepo,
 		TaskScheduler: taskScheduler,
-		SessionSecret: "secret",
 		IndexFile:     indexFile,
 		StaticFiles:   uiStaticFiles,
 	}

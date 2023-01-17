@@ -14,6 +14,7 @@ type AppConfig struct {
 	DbUser        string
 	DbPassword    string
 	DbName        string
+	SessionSecret string
 	EnableSwagger bool
 }
 
@@ -35,6 +36,7 @@ func GetAppConfig() *AppConfig {
 	dbUser := lookupMandatoryEnv("DB_USER")
 	dbPassword := lookupMandatoryEnv("DB_PASSWORD")
 	dbName := lookupMandatoryEnv("DB_NAME")
+	sessionSecret := lookupMandatoryEnv("SESSION_SECRET")
 	enableSwagger := lookupEnvWithDefault("ENABLE_SWAGGER", "false")
 	enableSwaggerBool, err := strconv.ParseBool(enableSwagger)
 	if err != nil {
@@ -47,6 +49,7 @@ func GetAppConfig() *AppConfig {
 		DbUser:        dbUser,
 		DbPassword:    dbPassword,
 		DbName:        dbName,
+		SessionSecret: sessionSecret,
 		EnableSwagger: enableSwaggerBool,
 	}
 

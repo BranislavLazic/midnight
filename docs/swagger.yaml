@@ -45,6 +45,14 @@ paths:
         "422":
           description: Unprocessable Entity
       summary: Login
+  /v1/logout:
+    post:
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: Logout
   /v1/services:
     get:
       responses:

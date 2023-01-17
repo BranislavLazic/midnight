@@ -4,7 +4,7 @@ VERSION := v0.1
 
 .PHONY: clean bin
 
-all: clean swag frontend zip
+all: clean swag zip
 
 swag:
 	swag init -g main.go
@@ -15,9 +15,9 @@ clean:
 frontend:
 	cd webapp && yarn && yarn build
 
-zip: release/$(APP)_$(VERSION)_linux_x86_64.tar.gz release/$(APP)_$(VERSION)_osx_x86_64.tar.gz
+zip: frontend release/$(APP)_$(VERSION)_linux_x86_64.tar.gz release/$(APP)_$(VERSION)_osx_x86_64.tar.gz
 
-binaries: binaries/linux_x86_64/$(APP) binaries/osx_x86_64/$(APP)
+binaries: frontend binaries/linux_x86_64/$(APP) binaries/osx_x86_64/$(APP)
 
 release/$(APP)_$(VERSION)_linux_x86_64.tar.gz: binaries/linux_x86_64/$(APP)
 	mkdir -p release

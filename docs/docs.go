@@ -49,6 +49,19 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/logout": {
+            "post": {
+                "summary": "Logout",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/v1/services": {
             "get": {
                 "summary": "Get all services",
