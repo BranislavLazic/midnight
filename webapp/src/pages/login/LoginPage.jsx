@@ -3,8 +3,10 @@ import { Button, Label, TextInput } from 'flowbite-react';
 import axios from 'axios';
 import { BASE_URL } from '../../../constants.cjs';
 import { useNavigate } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 
 const LoginPage = () => {
+  const intl = useIntl();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -27,28 +29,29 @@ const LoginPage = () => {
     <>
       <Nav />
       <div className="flex flex-col justify-center items-center w-full p-4 min-h-screen overflow-hidden bg-white dark:bg-gray-900">
-        <div className='flex flex-col justify-center items-center p-4 gap-4 dark:bg-gray-800 rounded'>
+        <div className="flex flex-col justify-center items-center p-4 gap-4 dark:bg-gray-800 rounded">
           <h1 className="text-xl font-bold dark:text-white md:text-3xl">
-            Sign In
+            {intl.formatMessage({ id: 'signIn' })}
           </h1>
           <form
             className="flex flex-col gap-4 min-w-[32rem]"
             onSubmit={handleLogin}
           >
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email" value="Email" />
-              <TextInput
-                id="email"
-                name="email"
-                type="email"
-                icons={<div></div>}
+              <Label
+                htmlFor="email"
+                value={intl.formatMessage({ id: 'email' })}
               />
+              <TextInput id="email" name="email" type="email" />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password" value="Password" />
+              <Label
+                htmlFor="password"
+                value={intl.formatMessage({ id: 'password' })}
+              />
               <TextInput id="password" name="password" type="password" />
             </div>
-            <Button type="submit">Login</Button>
+            <Button type="submit">{intl.formatMessage({ id: 'login' })}</Button>
           </form>
         </div>
       </div>

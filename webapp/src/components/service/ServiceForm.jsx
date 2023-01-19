@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { validationSchema } from './validation/validation';
 import { BASE_URL } from '../../../constants.cjs';
+import { useIntl } from 'react-intl';
 
 const initialFormValues = {
   name: '',
@@ -14,12 +15,13 @@ const initialFormValues = {
 
 const ServiceForm = () => {
   const { id } = useParams();
+  const intl = useIntl();
   const navigate = useNavigate();
   const [service, setService] = useState();
 
   const formik = useFormik({
     enableReinitialize: true,
-    validationSchema: validationSchema,
+    validationSchema: validationSchema(intl),
     initialValues: initialFormValues,
     onSubmit: async (values) => {
       try {
@@ -53,7 +55,11 @@ const ServiceForm = () => {
   return (
     <div className="flex grow h-fit w-fit">
       <div className="flex flex-col gap-4 min-w-[32rem] p-4 dark:bg-gray-800 rounded">
-        <h1 className="text-lg dark:text-white">Edit service</h1>
+        <h1 className="text-lg dark:text-white">
+          {id
+            ? intl.formatMessage({ id: 'editService' })
+            : intl.formatMessage({ id: 'addService' })}
+        </h1>
         <form
           className="flex flex-col gap-4 max-w-xl"
           onSubmit={(e) => e.preventDefault()}
@@ -61,7 +67,7 @@ const ServiceForm = () => {
           <div className="flex flex-col gap-2">
             <Label
               htmlFor="name"
-              value="Name (optional)"
+              value={intl.formatMessage({ id: 'nameOptional' })}
               color={
                 formik.touched.name &&
                 formik.errors.name !== undefined &&
@@ -96,7 +102,7 @@ const ServiceForm = () => {
           <div className="flex flex-col gap-2">
             <Label
               htmlFor="url"
-              value="URL"
+              value={intl.formatMessage({ id: 'url' })}
               color={
                 formik.touched.url &&
                 formik.errors.url !== undefined &&
@@ -131,7 +137,7 @@ const ServiceForm = () => {
           <div className="flex flex-col gap-2">
             <Label
               htmlFor="checkIntervalSeconds"
-              value="Check interval in seconds"
+              value={intl.formatMessage({ id: 'checkIntervalSeconds' })}
               color={
                 formik.touched.checkIntervalSeconds &&
                 formik.errors.checkIntervalSeconds !== undefined &&
@@ -166,7 +172,7 @@ const ServiceForm = () => {
           <div className="flex flex-row gap-4">
             <Link className="flex grow" to="/dashboard">
               <Button color="gray" className="grow">
-                Cancel
+                {intl.formatMessage({ id: 'cancel' })}
               </Button>
             </Link>
             <Button
@@ -174,7 +180,7 @@ const ServiceForm = () => {
               type="submit"
               onClick={formik.handleSubmit}
             >
-              Save
+              {intl.formatMessage({ id: 'save' })}
             </Button>
           </div>
         </form>

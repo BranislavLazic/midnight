@@ -6,8 +6,10 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { BASE_URL } from '../../constants.cjs';
+import { useIntl } from 'react-intl';
 
 const Nav = ({ editBoardButtonShown = false }) => {
+  const intl = useIntl();
   const navigate = useNavigate();
   const authUser = localStorage.getItem('authUser');
 
@@ -34,7 +36,7 @@ const Nav = ({ editBoardButtonShown = false }) => {
             <Button>
               <div className="flex gap-1 items-center">
                 <PencilIcon className="h-4 w-4" />
-                <span>Edit board</span>
+                <span>{intl.formatMessage({ id: 'editBoard' })}</span>
               </div>
             </Button>
           </Link>
@@ -43,7 +45,7 @@ const Nav = ({ editBoardButtonShown = false }) => {
           <Button color="gray" onClick={handleLogout}>
             <div className="flex gap-1 items-center">
               <ArrowLeftOnRectangleIcon className="h-4 w-4" />
-              <span>Logout</span>
+              <span>{intl.formatMessage({ id: 'logout' })}</span>
             </div>
           </Button>
         )}

@@ -3,8 +3,10 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { BASE_URL } from '../../constants.cjs';
+import { useIntl } from 'react-intl';
 
 const StatusTable = () => {
+  const intl = useIntl();
   const [serviceStatuses, setServiceStatuses] = useState([]);
 
   useEffect(() => {
@@ -23,9 +25,15 @@ const StatusTable = () => {
       <div className="w-full">
         <Table>
           <Table.Head>
-            <Table.HeadCell>Service</Table.HeadCell>
-            <Table.HeadCell>Status</Table.HeadCell>
-            <Table.HeadCell>Version</Table.HeadCell>
+            <Table.HeadCell>
+              {intl.formatMessage({ id: 'service' })}
+            </Table.HeadCell>
+            <Table.HeadCell>
+              {intl.formatMessage({ id: 'status' })}
+            </Table.HeadCell>
+            <Table.HeadCell>
+              {intl.formatMessage({ id: 'version' })}
+            </Table.HeadCell>
           </Table.Head>
           <Table.Body>
             {serviceStatuses.map((l, idx) => (

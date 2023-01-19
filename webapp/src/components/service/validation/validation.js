@@ -1,13 +1,16 @@
 import * as Yup from 'yup';
 
-export const validationSchema = () =>
+export const validationSchema = (intl) =>
   Yup.object({
-    name: Yup.string().max(200, 'Name cannot have more than 255 characters.'),
+    name: Yup.string().max(
+      200,
+      intl.formatMessage({ id: 'nameMaxCharsError' })
+    ),
     url: Yup.string()
-      .required('URL is required')
-      .max(4096, 'Name URL have more than 4096 characters.'),
+      .required(intl.formatMessage({ id: 'urlRequiredError' }))
+      .max(4096, intl.formatMessage({ id: 'urlMaxCharsError' })),
     checkIntervalSeconds: Yup.number()
-      .required('Check interval is required')
-      .min(3, 'Check interval cannot be less than 3 seconds.')
-      .max(86400, 'Check interval cannot be greater than 86400 seconds.'),
+      .required(intl.formatMessage({ id: 'checkIntervalRequiredError' }))
+      .min(3, intl.formatMessage({ id: 'checkIntervalMinValueError' }))
+      .max(86400, intl.formatMessage({ id: 'checkIntervalMaxValueError' })),
   });

@@ -1,7 +1,9 @@
 import Nav from '../../components/Nav';
 import { Sidebar } from 'flowbite-react';
+import { useIntl } from 'react-intl';
 
 const Dashboard = ({ children }) => {
+  const intl = useIntl();
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden">
       <Nav />
@@ -9,7 +11,9 @@ const Dashboard = ({ children }) => {
         <Sidebar>
           <Sidebar.Items>
             <Sidebar.ItemGroup>
-              <Sidebar.Item href="/dashboard">Services</Sidebar.Item>
+              <Sidebar.Item href="/dashboard">
+                {intl.formatMessage({ id: 'services' })}
+              </Sidebar.Item>
             </Sidebar.ItemGroup>
           </Sidebar.Items>
         </Sidebar>

@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { Button, Table } from 'flowbite-react';
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { BASE_URL } from '../../../constants.cjs';
+import { useIntl } from 'react-intl';
 
 const ServiceTable = () => {
+  const intl = useIntl();
   const [services, setServices] = useState([]);
 
   useEffect(() => {
@@ -33,22 +35,30 @@ const ServiceTable = () => {
     <div className="flex grow">
       <div className="flex flex-col gap-4 min-w-full p-4 dark:bg-gray-800 rounded">
         <div className="flex flex-row justify-between items-center">
-          <h1 className="text-lg font-bold dark:text-white">Services</h1>
+          <h1 className="text-lg font-bold dark:text-white">
+            {intl.formatMessage({ id: 'services' })}
+          </h1>
           <Link to="/dashboard/services">
             <Button>
               <div className="flex gap-1 items-center">
                 <PlusIcon className="h-4 w-4 stroke-2" />
-                <span>Add</span>
+                <span>{intl.formatMessage({ id: 'add' })}</span>
               </div>
             </Button>
           </Link>
         </div>
         <Table>
           <Table.Head>
-            <Table.HeadCell>Name</Table.HeadCell>
-            <Table.HeadCell>Url</Table.HeadCell>
-            <Table.HeadCell>Check interval (seconds)</Table.HeadCell>
-            <Table.HeadCell>Actions</Table.HeadCell>
+            <Table.HeadCell>
+              {intl.formatMessage({ id: 'name' })}
+            </Table.HeadCell>
+            <Table.HeadCell>{intl.formatMessage({ id: 'url' })}</Table.HeadCell>
+            <Table.HeadCell>
+              {intl.formatMessage({ id: 'checkIntervalSeconds' })}
+            </Table.HeadCell>
+            <Table.HeadCell>
+              {intl.formatMessage({ id: 'actions' })}
+            </Table.HeadCell>
           </Table.Head>
           <Table.Body>
             {services.map((s, idx) => (
