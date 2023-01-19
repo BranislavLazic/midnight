@@ -1,4 +1,4 @@
-import { Badge, Table } from 'flowbite-react';
+import { Badge, Table, Tooltip } from 'flowbite-react';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
@@ -47,8 +47,20 @@ const StatusTable = () => {
                   </a>
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                  <Badge color={l.statusCode < 400 ? 'success' : 'failure'}>
-                    {l.status}
+                  <Badge
+                    color={
+                      l.statusCode < 400
+                        ? l.responseBodyStatus === 'OK'
+                          ? 'success'
+                          : 'warning'
+                        : 'failure'
+                    }
+                  >
+                    {l.status +
+                      (l.responseBodyStatus.length === 0 ||
+                      l.responseBodyStatus === 'OK'
+                        ? ''
+                        : ' - ' + intl.formatMessage({ id: 'notHealthy' }))}
                   </Badge>
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">

@@ -1,4 +1,4 @@
-import { Label, TextInput, Button } from 'flowbite-react';
+import { Label, TextInput, Button, Textarea } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { useIntl } from 'react-intl';
 const initialFormValues = {
   name: '',
   url: '',
+  responseBody: '',
   checkIntervalSeconds: 5,
 };
 
@@ -131,6 +132,40 @@ const ServiceForm = () => {
               formik.errors.url && (
                 <span className="text-xs font-medium text-red-700 dark:text-red-500">
                   {formik.errors.url}
+                </span>
+              )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="responseBody"
+              value={intl.formatMessage({ id: 'responseBodyOptional' })}
+              color={
+                formik.touched.responseBody &&
+                formik.errors.responseBody !== undefined &&
+                formik.errors.responseBody
+                  ? 'failure'
+                  : undefined
+              }
+            />
+            <Textarea
+              id="responseBody"
+              name="responseBody"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.responseBody}
+              color={
+                formik.touched.responseBody &&
+                formik.errors.responseBody !== undefined &&
+                formik.errors.responseBody
+                  ? 'failure'
+                  : 'gray'
+              }
+            />
+            {formik.touched.responseBody &&
+              formik.errors.responseBody !== undefined &&
+              formik.errors.responseBody && (
+                <span className="text-xs font-medium text-red-700 dark:text-red-500">
+                  {formik.errors.responseBody}
                 </span>
               )}
           </div>

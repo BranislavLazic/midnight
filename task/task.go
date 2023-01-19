@@ -11,24 +11,33 @@ import (
 
 const ServiceStatusCacheName = "service-status"
 
-type ServiceStatus struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	URL        string `json:"url"`
-	Version    string `json:"version,omitempty"`
-	Status     string `json:"status"`
-	StatusCode int    `json:"statusCode"`
+type ResponseBodyStatus int
+
+const (
+	Ok ResponseBodyStatus = iota + 1
+	NotMatching
+)
+
+func (rbs ResponseBodyStatus) String() string {
+	return [...]string{"OK", "NOT_MATCHING"}[rbs-1]
 }
 
-type ServiceStatusResponse struct {
-	Version string `json:"version"`
+type ServiceStatus struct {
+	ID                 int64  `json:"id"`
+	Name               string `json:"name"`
+	URL                string `json:"url"`
+	ResponseBodyStatus string `json:"responseBodyStatus"`
+	Version            string `json:"version,omitempty"`
+	Status             string `json:"status"`
+	StatusCode         int    `json:"statusCode"`
 }
 
 type Config struct {
-	ID      int64
-	Name    string
-	URL     string
-	Timeout int
+	ID           int64
+	Name         string
+	URL          string
+	ResponseBody string
+	Timeout      int
 }
 
 type Provider struct {
@@ -66,14 +75,20 @@ func (tp *Provider) NewTask(config Config) func() {
 			}
 		} else {
 			log.Debug().Msg(res.Status)
-			var serviceStatusResponse ServiceStatusResponse
+			var serviceStatusResponse string
 			err := json.NewDecoder(res.Body).Decode(&serviceStatusResponse)
 			if err != nil {
 				//log.Debug().Err(err).Msg("failed to extract the request body")
 			}
+			var responseBodyStatus string
+			if len(config.ResponseBody) == 0 || serviceStatusResponse == config.ResponseBody {
+				responseBodyStatus = Ok.String()
+			} else {
+				responseBodyStatus = NotMatching.String()
+			}
 			err = SaveServiceStatus(
 				tp.cache,
-				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Version: serviceStatusResponse.Version, Status: res.Status, StatusCode: res.StatusCode},
+				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, ResponseBodyStatus: responseBodyStatus, Status: res.Status, StatusCode: res.StatusCode},
 			)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to set the task")

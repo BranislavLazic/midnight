@@ -25,11 +25,11 @@ const Nav = ({ editBoardButtonShown = false }) => {
 
   return (
     <Navbar fluid={true}>
-      <Navbar.Brand href="/">
+      <Link to="/">
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
           Midnight
         </span>
-      </Navbar.Brand>
+      </Link>
       <div className="flex gap-4">
         {editBoardButtonShown && (
           <Link to="/dashboard">

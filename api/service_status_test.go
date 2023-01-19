@@ -23,11 +23,12 @@ func TestServiceStatusNoStatuses(t *testing.T) {
 
 func TestServiceStatusSingleStatus(t *testing.T) {
 	err := task.SaveServiceStatus(testapi.Cache, task.ServiceStatus{
-		ID:         1,
-		Name:       "Test service",
-		URL:        "http://testservice.com",
-		Status:     "200 OK",
-		StatusCode: 200,
+		ID:                 1,
+		Name:               "Test service",
+		URL:                "http://testservice.com",
+		ResponseBodyStatus: `{"status":"ok"}`,
+		Status:             "200 OK",
+		StatusCode:         200,
 	})
 	if err != nil {
 		t.Fatal("failed to save the service status")
@@ -38,6 +39,6 @@ func TestServiceStatusSingleStatus(t *testing.T) {
 	utils.AssertEqual(t, 200, res.StatusCode, "Status code")
 
 	body, err := io.ReadAll(res.Body)
-	expectedBody := `[{"id":1,"name":"Test service","url":"http://testservice.com","status":"200 OK","statusCode":200}]`
+	expectedBody := `[{"id":1,"name":"Test service","url":"http://testservice.com","responseBodyStatus":"{\"status\":\"ok\"}","status":"200 OK","statusCode":200}]`
 	utils.AssertEqual(t, expectedBody, string(body), "Body")
 }

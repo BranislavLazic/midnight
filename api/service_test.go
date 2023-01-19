@@ -33,7 +33,7 @@ func TestServiceFound(t *testing.T) {
 	const serviceID = model.ServiceID(1)
 	serviceRepo := postgres.NewServiceRepository(testapi.DB)
 	_ = serviceRepo.DeleteAll()
-	_, err := serviceRepo.Create(&model.Service{ID: serviceID, Name: "Test service", URL: "http://service.com", CheckIntervalSeconds: 30})
+	_, err := serviceRepo.Create(&model.Service{ID: serviceID, Name: "Test service", ResponseBody: `{"status":"ok"}`, URL: "http://service.com", CheckIntervalSeconds: 30})
 	if err != nil {
 		t.Fatal("failed to create a service")
 	}
@@ -46,6 +46,6 @@ func TestServiceFound(t *testing.T) {
 	utils.AssertEqual(t, 200, res.StatusCode, "Status code")
 
 	body, err := io.ReadAll(res.Body)
-	expectedBody := `[{"id":1,"name":"Test service","url":"http://service.com","checkIntervalSeconds":30}]`
+	expectedBody := `[{"id":1,"name":"Test service","url":"http://service.com","responseBody":"{\"status\":\"ok\"}","checkIntervalSeconds":30}]`
 	utils.AssertEqual(t, expectedBody, string(body), "Body")
 }

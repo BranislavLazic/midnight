@@ -28,7 +28,7 @@ func (s *Scheduler) RunAll() error {
 		log.Info().Msgf(
 			"initializing service %service at %service - check every %d seconds", service.Name, service.URL, service.CheckIntervalSeconds,
 		)
-		taskConfig := Config{ID: int64(service.ID), Name: service.Name, URL: service.URL, Timeout: service.CheckIntervalSeconds}
+		taskConfig := Config{ID: int64(service.ID), Name: service.Name, URL: service.URL, ResponseBody: service.ResponseBody, Timeout: service.CheckIntervalSeconds}
 		_, err := s.scheduler.Every(service.CheckIntervalSeconds).
 			Tag(strconv.FormatInt(int64(service.ID), 10)).
 			Seconds().
