@@ -8,14 +8,16 @@ import (
 	"github.com/branislavlazic/midnight/cache"
 	"github.com/branislavlazic/midnight/config"
 	_ "github.com/branislavlazic/midnight/docs"
-	"github.com/branislavlazic/midnight/model"
+	"github.com/branislavlazic/midnight/repository/postgres"
 	"github.com/branislavlazic/midnight/task"
+	"github.com/go-co-op/gocron"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/gofiber/storage/postgres"
+	pg "github.com/gofiber/storage/postgres"
 	"github.com/rs/zerolog/log"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
+	"gorm.io/gorm"
 	"io/fs"
 	"net/http"
 	"time"
@@ -24,20 +26,28 @@ import (
 const sessionStoreTableName = "sessions"
 
 type ServerSettings struct {
-	Config        *config.AppConfig
-	Cache         cache.Internal
-	ServiceRepo   model.ServiceRepository
-	UserRepo      model.UserRepository
-	SessionStore  *session.Store
-	TaskScheduler *task.Scheduler
-	IndexFile     embed.FS
-	StaticFiles   embed.FS
+	Config      *config.AppConfig
+	DB          *gorm.DB
+	Cache       cache.Internal
+	IndexFile   embed.FS
+	StaticFiles embed.FS
 }
 
-func StartServer(settings ServerSettings) error {
+func InitApp(settings ServerSettings) *fiber.App {
+	serviceRepo := postgres.NewServiceRepository(settings.DB)
+	userRepo := postgres.NewUserRepository(settings.DB)
+
+	scheduler := gocron.NewScheduler(time.UTC)
+	taskProvider := task.NewProvider(settings.Cache)
+	taskScheduler := task.NewScheduler(scheduler, taskProvider, serviceRepo)
+	err := taskScheduler.RunAll()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to initialize task scheduler")
+	}
+
 	secureSessionExpiry := 7 * 24 * time.Hour
 	cookieKeyLookup := "cookie:" + sess.SecureCookieName
-	pgStore := postgres.New(postgres.Config{
+	pgStore := pg.New(pg.Config{
 		Host:     settings.Config.DbHost,
 		Port:     settings.Config.DbPort,
 		Username: settings.Config.DbUser,
@@ -57,8 +67,8 @@ func StartServer(settings ServerSettings) error {
 	auth := middleware.NewAuthenticator(sessionStore, settings.Config.SessionSecret)
 
 	serviceStatusRoutes := NewServiceStatusRoutes(settings.Cache)
-	serviceRoutes := NewServiceRoutes(settings.ServiceRepo, settings.TaskScheduler)
-	userRoutes := NewUserRoutes(settings.UserRepo, sessionStore)
+	serviceRoutes := NewServiceRoutes(serviceRepo, taskScheduler)
+	userRoutes := NewUserRoutes(userRepo, sessionStore)
 
 	app := fiber.New()
 	// API routes
@@ -89,9 +99,11 @@ func StartServer(settings ServerSettings) error {
 	app.Get("/*", func(ctx *fiber.Ctx) error {
 		return filesystem.SendFile(ctx, http.FS(indexSubDir), "/index.html")
 	})
+	return app
+}
 
-	// Start server
-	err := app.Listen(fmt.Sprintf(":%d", settings.Config.AppPort))
+func StartServer(settings ServerSettings) error {
+	err := InitApp(settings).Listen(fmt.Sprintf(":%d", settings.Config.AppPort))
 	if err != nil {
 		return err
 	}

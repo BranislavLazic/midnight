@@ -3,17 +3,12 @@ package main
 import (
 	"context"
 	"embed"
-	"github.com/branislavlazic/midnight/config"
-	"time"
-
-	"github.com/branislavlazic/midnight/db"
-	"github.com/branislavlazic/midnight/repository/postgres"
-
 	"github.com/allegro/bigcache/v3"
 	"github.com/branislavlazic/midnight/api"
-	"github.com/branislavlazic/midnight/task"
-	"github.com/go-co-op/gocron"
+	"github.com/branislavlazic/midnight/config"
+	"github.com/branislavlazic/midnight/db"
 	"github.com/rs/zerolog/log"
+	"time"
 )
 
 //go:embed webapp/dist
@@ -40,24 +35,12 @@ func main() {
 		log.Logger.Fatal().Err(err).Msg("failed to run the migrations")
 	}
 
-	serviceRepo := postgres.NewServiceRepository(pgDb)
-	userRepo := postgres.NewUserRepository(pgDb)
-
-	scheduler := gocron.NewScheduler(time.UTC)
-	taskProvider := task.NewProvider(cache)
-	taskScheduler := task.NewScheduler(scheduler, taskProvider, serviceRepo)
-	err = taskScheduler.RunAll()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to initialize task scheduler")
-	}
 	serverSettings := api.ServerSettings{
-		Config:        cfg,
-		Cache:         cache,
-		ServiceRepo:   serviceRepo,
-		UserRepo:      userRepo,
-		TaskScheduler: taskScheduler,
-		IndexFile:     indexFile,
-		StaticFiles:   uiStaticFiles,
+		Config:      cfg,
+		DB:          pgDb,
+		Cache:       cache,
+		IndexFile:   indexFile,
+		StaticFiles: uiStaticFiles,
 	}
 	err = api.StartServer(serverSettings)
 	if err != nil {

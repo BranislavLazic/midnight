@@ -2,3 +2,4 @@
 .env
 bin
 release
+.DS_Store
