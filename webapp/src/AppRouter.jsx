@@ -1,13 +1,15 @@
 import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
-import StatusPage from './pages/status/StatusPage.jsx';
-import Dashboard from './pages/dashboard/Dashboard.jsx';
 import ServiceTable from './components/service/ServiceTable.jsx';
 import ServiceForm from './components/service/ServiceForm.jsx';
-import LoginPage from './pages/login/LoginPage.jsx';
 import AuthRoute from './components/AuthRoute.jsx';
+import { lazy } from 'react';
 
 const browserHistory = createBrowserHistory();
+
+const StatusPage = lazy(() => import('./pages/status/StatusPage'));
+const LoginPage = lazy(() => import('./pages/login/LoginPage'));
+const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 
 const AppRouter = () => {
   return (
