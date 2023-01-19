@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	_ "embed"
 	"github.com/allegro/bigcache/v3"
 	"github.com/branislavlazic/midnight/api"
 	"github.com/branislavlazic/midnight/config"
