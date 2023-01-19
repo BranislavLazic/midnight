@@ -9,7 +9,7 @@ all: clean swag test zip
 swag:
 	swag init -g main.go
 
-test:
+test: frontend
 	docker-compose up -d postgres_test
 	go test -count=1 -cover -v ./...
 	docker-compose stop postgres_test
