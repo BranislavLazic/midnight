@@ -68,14 +68,14 @@ func InitApp(settings ServerSettings) *fiber.App {
 
 	serviceStatusRoutes := NewServiceStatusRoutes(settings.Cache)
 	serviceRoutes := NewServiceRoutes(serviceRepo, taskScheduler)
-	userRoutes := NewUserRoutes(userRepo, sessionStore)
+	authRoutes := NewAuthRoutes(userRepo, sessionStore)
 
 	app := fiber.New()
 	// API routes
-	app.Post("/v1/login", userRoutes.Login)
+	app.Post("/v1/login", authRoutes.Login)
 	app.Get("/v1/status", serviceStatusRoutes.GetStatus)
 	// Authenticated routes
-	app.Post("/v1/logout", userRoutes.Logout)
+	app.Post("/v1/logout", authRoutes.Logout)
 	app.Get("/v1/services", auth.Authenticated(serviceRoutes.GetAllServices))
 	app.Get("/v1/services/:id", auth.Authenticated(serviceRoutes.GetById))
 	app.Post("/v1/services", auth.Authenticated(serviceRoutes.CreateService))

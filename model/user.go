@@ -11,10 +11,11 @@ type User struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type UserRepository interface {
+	Create(user *User) (UserID, error)
 	GetByEmail(email string) (*User, error)
 }

@@ -13,13 +13,13 @@ import (
 	"time"
 )
 
-type UserRoutes struct {
+type AuthRoutes struct {
 	userRepo     model.UserRepository
 	sessionStore *session.Store
 }
 
-func NewUserRoutes(userRepo model.UserRepository, sessionStore *session.Store) *UserRoutes {
-	return &UserRoutes{userRepo: userRepo, sessionStore: sessionStore}
+func NewAuthRoutes(userRepo model.UserRepository, sessionStore *session.Store) *AuthRoutes {
+	return &AuthRoutes{userRepo: userRepo, sessionStore: sessionStore}
 }
 
 // Login godoc
@@ -28,16 +28,17 @@ func NewUserRoutes(userRepo model.UserRepository, sessionStore *session.Store) *
 // @Failure 400,401,404,422
 // @Success 200
 // @Router /v1/login [post]
-func (ur *UserRoutes) Login(ctx *fiber.Ctx) error {
+func (ar *AuthRoutes) Login(ctx *fiber.Ctx) error {
 	var loginRequest *model.LoginRequest
 	if err := ctx.BodyParser(&loginRequest); err != nil {
 		log.Debug().Err(err).Msg("failed to parse the request as login request")
 		return ctx.SendStatus(http.StatusBadRequest)
 	}
-	if err := validator.New().Struct(loginRequest); err != nil {
+	err := validator.New().Struct(loginRequest)
+	if err != nil {
 		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
 	}
-	user, err := ur.userRepo.GetByEmail(loginRequest.Email)
+	user, err := ar.userRepo.GetByEmail(loginRequest.Email)
 	if err != nil {
 		log.Debug().Err(err).Msgf("failed to find the user by email %s", loginRequest.Email)
 		return ctx.SendStatus(http.StatusNotFound)
@@ -47,7 +48,7 @@ func (ur *UserRoutes) Login(ctx *fiber.Ctx) error {
 		log.Debug().Err(err).Msgf("incorrect password")
 		return ctx.SendStatus(http.StatusUnauthorized)
 	}
-	sess, err := ur.sessionStore.Get(ctx)
+	sess, err := ar.sessionStore.Get(ctx)
 	if err != nil {
 		return ctx.SendStatus(http.StatusUnauthorized)
 	}
@@ -64,8 +65,8 @@ func (ur *UserRoutes) Login(ctx *fiber.Ctx) error {
 // @Failure 500
 // @Success 200
 // @Router /v1/logout [post]
-func (ur *UserRoutes) Logout(ctx *fiber.Ctx) error {
-	err := ur.sessionStore.Reset()
+func (ar *AuthRoutes) Logout(ctx *fiber.Ctx) error {
+	err := ar.sessionStore.Reset()
 	if err != nil {
 		log.Error().Err(err).Msgf("failed to remove the session")
 		return ctx.SendStatus(http.StatusInternalServerError)

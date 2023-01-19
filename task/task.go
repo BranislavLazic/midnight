@@ -57,7 +57,10 @@ func (tp *Provider) NewTask(config Config) func() {
 		res, err := client.Do(req)
 		if err != nil {
 			log.Warn().Err(err).Msg("failed to get a response")
-			err := tp.saveServiceStatus(ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Status: "404 Not Found", StatusCode: 404})
+			err := SaveServiceStatus(
+				tp.cache,
+				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Status: "404 Not Found", StatusCode: 404},
+			)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to set the task")
 			}
@@ -68,7 +71,8 @@ func (tp *Provider) NewTask(config Config) func() {
 			if err != nil {
 				//log.Debug().Err(err).Msg("failed to extract the request body")
 			}
-			err = tp.saveServiceStatus(
+			err = SaveServiceStatus(
+				tp.cache,
 				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Version: serviceStatusResponse.Version, Status: res.Status, StatusCode: res.StatusCode},
 			)
 			if err != nil {
@@ -93,10 +97,10 @@ func (tp *Provider) RemoveTask(ID int64) error {
 	return tp.cache.Set(ServiceStatusCacheName, serializeServiceStatus(serviceStatuses))
 }
 
-func (tp *Provider) saveServiceStatus(serviceStatus ServiceStatus) error {
-	bytes, err := tp.cache.Get(ServiceStatusCacheName)
+func SaveServiceStatus(cache cache.Internal, serviceStatus ServiceStatus) error {
+	bytes, err := cache.Get(ServiceStatusCacheName)
 	if err != nil {
-		return tp.cache.Set(
+		return cache.Set(
 			ServiceStatusCacheName,
 			serializeServiceStatus(map[int64]ServiceStatus{serviceStatus.ID: serviceStatus}),
 		)
@@ -107,7 +111,7 @@ func (tp *Provider) saveServiceStatus(serviceStatus ServiceStatus) error {
 			return err
 		}
 		serviceStatuses[serviceStatus.ID] = serviceStatus
-		return tp.cache.Set(ServiceStatusCacheName, serializeServiceStatus(serviceStatuses))
+		return cache.Set(ServiceStatusCacheName, serializeServiceStatus(serviceStatuses))
 	}
 }
 
