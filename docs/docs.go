@@ -205,6 +205,10 @@ const docTemplate = `{
     "definitions": {
         "model.LoginRequest": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"

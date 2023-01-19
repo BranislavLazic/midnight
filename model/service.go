@@ -37,5 +37,6 @@ type ServiceRepository interface {
 	GetAll() ([]Service, error)
 	GetById(ID ServiceID) (*Service, error)
 	DeleteById(ID ServiceID) error
+	DeleteAll() error
 	ExistsByURL(URL string) bool
 }

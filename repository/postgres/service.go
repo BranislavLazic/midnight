@@ -46,3 +46,7 @@ func (psr *ServiceRepository) DeleteById(ID model.ServiceID) error {
 	}
 	return psr.db.Delete(&service, ID).Error
 }
+
+func (psr *ServiceRepository) DeleteAll() error {
+	return psr.db.Delete(&model.Service{}, "id > 0").Error
+}

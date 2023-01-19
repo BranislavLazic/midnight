@@ -14,6 +14,8 @@ import (
 )
 
 func TestServiceNoData(t *testing.T) {
+	serviceRepo := postgres.NewServiceRepository(testapi.DB)
+	_ = serviceRepo.DeleteAll()
 	app := testapi.InitTestApp()
 	sessionCookieID := testapi.GenerateSecureSession(t)
 	req := httptest.NewRequest(fiber.MethodGet, "/v1/services", nil)
@@ -30,7 +32,7 @@ func TestServiceNoData(t *testing.T) {
 func TestServiceFound(t *testing.T) {
 	const serviceID = model.ServiceID(1)
 	serviceRepo := postgres.NewServiceRepository(testapi.DB)
-	_ = serviceRepo.DeleteById(serviceID)
+	_ = serviceRepo.DeleteAll()
 	_, err := serviceRepo.Create(&model.Service{ID: serviceID, Name: "Test service", URL: "http://service.com", CheckIntervalSeconds: 30})
 	if err != nil {
 		t.Fatal("failed to create a service")

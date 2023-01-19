@@ -2,12 +2,17 @@ APP=midnight
 MODULE := github.com/branislavlazic/midnight
 VERSION := v0.1
 
-.PHONY: clean bin
+.PHONY: clean bin test
 
-all: clean swag zip
+all: clean swag test zip
 
 swag:
 	swag init -g main.go
+
+test:
+	docker-compose up -d postgres_test
+	go test -count=1 -cover -v ./...
+	docker-compose stop postgres_test
 
 clean:
 	rm -rf bin release
