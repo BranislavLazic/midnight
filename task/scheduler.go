@@ -51,6 +51,9 @@ func (s *Scheduler) Add(cfg Config, checkIntervalSeconds int) error {
 	if err != nil {
 		return err
 	}
+	if !s.scheduler.IsRunning() {
+		s.scheduler.StartAsync()
+	}
 	_, err = s.scheduler.Job(job).Update()
 	if err != nil {
 		return err

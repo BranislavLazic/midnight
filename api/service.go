@@ -49,7 +49,13 @@ func (sr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
 		log.Error().Err(err).Msg("failed to create a service")
 		return ctx.SendStatus(http.StatusInternalServerError)
 	}
-	taskConfig := task.Config{ID: int64(ID), Name: serviceRequest.Name, URL: serviceRequest.URL, Timeout: serviceRequest.CheckIntervalSeconds}
+	taskConfig := task.Config{
+		ID:           int64(ID),
+		Name:         serviceRequest.Name,
+		URL:          serviceRequest.URL,
+		ResponseBody: serviceRequest.ResponseBody,
+		Timeout:      serviceRequest.CheckIntervalSeconds,
+	}
 	err = sr.taskScheduler.Add(taskConfig, serviceRequest.CheckIntervalSeconds)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to add the task")

@@ -47,6 +47,7 @@ github.com/gofiber/fiber/v2 v2.41.0 h1:YhNoUS/OTjEz+/WLYuQ01xI7RXgKEFnGBKMagAu5f
 github.com/gofiber/fiber/v2 v2.41.0/go.mod h1:RdebcCuCRFp4W6hr3968/XxwJVg0K+jr9/Ae0PFzZ0Q=
 github.com/gofiber/storage/postgres v0.0.0-20230109091934-d46ce172d62c h1:kUnuaGJoCbZPQCuah5mG9QK0A0D2p1+N3qCKkOFaqfk=
 github.com/gofiber/storage/postgres v0.0.0-20230109091934-d46ce172d62c/go.mod h1:kZK6VIPXSMp2/C/Cm2DPeeFEgYFZj7zEQu9Ri9tqKWY=
+github.com/gofiber/utils v1.0.1 h1:knct4cXwBipWQqFrOy1Pv6UcgPM+EXo9jDgc66V1Qio=
 github.com/gofiber/utils v1.0.1/go.mod h1:pacRFtghAE3UoknMOUiXh2Io/nLWSUHtQCi/3QASsOc=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=

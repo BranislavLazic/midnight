@@ -7,11 +7,13 @@ require (
 	github.com/go-co-op/gocron v1.18.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gofiber/fiber/v2 v2.41.0
+	github.com/gofiber/storage/postgres v0.0.0-20230109091934-d46ce172d62c
 	github.com/joho/godotenv v1.4.0
 	github.com/pressly/goose/v3 v3.7.0
 	github.com/rs/zerolog v1.28.0
 	github.com/swaggo/fiber-swagger v1.3.0
 	github.com/swaggo/swag v1.8.9
+	golang.org/x/crypto v0.5.0
 	gorm.io/driver/postgres v1.4.6
 	gorm.io/gorm v1.24.3
 )
@@ -25,7 +27,6 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/gofiber/storage/postgres v0.0.0-20230109091934-d46ce172d62c // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.2.0 // indirect
@@ -45,7 +46,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.44.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect

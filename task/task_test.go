@@ -15,7 +15,7 @@ func TestNewTask(t *testing.T) {
 	const taskID = 1
 	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to initialize cache")
+		t.Fatalf("failed to initialize cache %s", err.Error())
 	}
 	provider := task.NewProvider(cache)
 	cfg := task.Config{ID: taskID, Name: "Test service", URL: "http://testservice", Timeout: 10}
