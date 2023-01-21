@@ -39,6 +39,7 @@ func init() {
 	_ = DB.AutoMigrate(&model.User{})
 	_ = DB.AutoMigrate(&model.Service{})
 	_ = DB.AutoMigrate(&Session{})
+	_ = DB.AutoMigrate(&model.Environment{})
 	Cache, _ = bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 }
 

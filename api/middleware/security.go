@@ -7,23 +7,14 @@ import (
 	"net/http"
 )
 
-type Authenticator struct {
-	sessionStore    *session.Store
-	cookieSecretKey string
-}
-
-func NewAuthenticator(sessionStore *session.Store, cookieSecretKey string) *Authenticator {
-	return &Authenticator{sessionStore: sessionStore, cookieSecretKey: cookieSecretKey}
-}
-
-func (a *Authenticator) Authenticated(next func(ctx *fiber.Ctx) error) func(ctx *fiber.Ctx) error {
+func Authenticated(sessionStore *session.Store, cookieSecretKey string) func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		secureCookie := ctx.Cookies(sess.SecureCookieName)
-		ok := sess.VerifySessionID(secureCookie, a.cookieSecretKey)
+		ok := sess.VerifySessionID(secureCookie, cookieSecretKey)
 		if !ok {
 			return ctx.SendStatus(http.StatusUnauthorized)
 		}
-		s, err := a.sessionStore.Get(ctx)
+		s, err := sessionStore.Get(ctx)
 		if err != nil {
 			return ctx.SendStatus(http.StatusUnauthorized)
 		}
@@ -31,6 +22,6 @@ func (a *Authenticator) Authenticated(next func(ctx *fiber.Ctx) error) func(ctx 
 		if data == nil {
 			return ctx.SendStatus(http.StatusUnauthorized)
 		}
-		return next(ctx)
+		return ctx.Next()
 	}
 }

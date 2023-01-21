@@ -36,6 +36,7 @@ type ServerSettings struct {
 func InitApp(settings ServerSettings) *fiber.App {
 	serviceRepo := postgres.NewServiceRepository(settings.DB)
 	userRepo := postgres.NewUserRepository(settings.DB)
+	envRepo := postgres.NewEnvironmentRepository(settings.DB)
 
 	scheduler := gocron.NewScheduler(time.UTC)
 	taskProvider := task.NewProvider(settings.Cache)
@@ -64,11 +65,12 @@ func InitApp(settings ServerSettings) *fiber.App {
 		KeyGenerator:   generateSessionIdFn(settings.Config.SessionSecret),
 	})
 
-	auth := middleware.NewAuthenticator(sessionStore, settings.Config.SessionSecret)
+	authFn := middleware.Authenticated(sessionStore, settings.Config.SessionSecret)
 
+	authRoutes := NewAuthRoutes(userRepo, sessionStore)
 	serviceStatusRoutes := NewServiceStatusRoutes(settings.Cache)
 	serviceRoutes := NewServiceRoutes(serviceRepo, taskScheduler)
-	authRoutes := NewAuthRoutes(userRepo, sessionStore)
+	envRoutes := NewEnvironmentRoutes(envRepo)
 
 	app := fiber.New()
 	// API routes
@@ -76,11 +78,13 @@ func InitApp(settings ServerSettings) *fiber.App {
 	app.Get("/v1/status", serviceStatusRoutes.GetStatus)
 	// Authenticated routes
 	app.Post("/v1/logout", authRoutes.Logout)
-	app.Get("/v1/services", auth.Authenticated(serviceRoutes.GetAllServices))
-	app.Get("/v1/services/:id", auth.Authenticated(serviceRoutes.GetById))
-	app.Post("/v1/services", auth.Authenticated(serviceRoutes.CreateService))
-	app.Put("/v1/services/:id", auth.Authenticated(serviceRoutes.UpdateService))
-	app.Delete("/v1/services/:id", auth.Authenticated(serviceRoutes.DeleteById))
+	app.Get("/v1/services", serviceRoutes.GetAllServices)
+	app.Get("/v1/services/:id", authFn, serviceRoutes.GetById)
+	app.Post("/v1/services", authFn, serviceRoutes.CreateService)
+	app.Put("/v1/services/:id", authFn, serviceRoutes.UpdateService)
+	app.Delete("/v1/services/:id", authFn, serviceRoutes.DeleteById)
+	app.Post("/v1/environments", authFn, envRoutes.CreateEnvironment)
+	app.Get("/v1/environments", envRoutes.GetAllEnvironments)
 
 	// Swagger
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
