@@ -12,6 +12,7 @@ import (
 	"github.com/branislavlazic/midnight/task"
 	"github.com/go-co-op/gocron"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	pg "github.com/gofiber/storage/postgres"
@@ -69,10 +70,14 @@ func InitApp(settings ServerSettings) *fiber.App {
 
 	authRoutes := NewAuthRoutes(userRepo, sessionStore)
 	serviceStatusRoutes := NewServiceStatusRoutes(settings.Cache)
-	serviceRoutes := NewServiceRoutes(serviceRepo, taskScheduler)
+	serviceRoutes := NewServiceRoutes(serviceRepo, envRepo, taskScheduler)
 	envRoutes := NewEnvironmentRoutes(envRepo)
 
 	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 	// API routes
 	app.Post("/v1/login", authRoutes.Login)
 	app.Get("/v1/status", serviceStatusRoutes.GetStatus)

@@ -39,6 +39,6 @@ func TestEnvironmentFound(t *testing.T) {
 	utils.AssertEqual(t, 200, res.StatusCode, "Status code")
 
 	body, err := io.ReadAll(res.Body)
-	expectedBody := `[{"id":1,"Name":"PROD"}]`
+	expectedBody := `[{"id":1,"name":"PROD"}]`
 	utils.AssertEqual(t, expectedBody, string(body), "Body")
 }

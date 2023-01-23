@@ -40,7 +40,6 @@ func init() {
 	_ = DB.AutoMigrate(&model.Service{})
 	_ = DB.AutoMigrate(&Session{})
 	_ = DB.AutoMigrate(&model.Environment{})
-	Cache, _ = bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 }
 
 func TestConfig() *config.AppConfig {
@@ -55,6 +54,7 @@ func TestConfig() *config.AppConfig {
 }
 
 func InitTestApp() *fiber.App {
+	Cache, _ = bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 	serverSettings := api.ServerSettings{Config: TestConfig(), DB: DB, Cache: Cache}
 	return api.InitApp(serverSettings)
 }

@@ -2,11 +2,13 @@ package model
 
 import "strings"
 
+const DefaultEnvironmentName = "None"
+
 type EnvironmentID int64
 
 type Environment struct {
 	ID   EnvironmentID `gorm:"primaryKey,autoIncrement" json:"id"`
-	Name string        `gorm:"type:VARCHAR(255)"`
+	Name string        `gorm:"type:VARCHAR(255)" json:"name"`
 }
 
 type EnvironmentRequest struct {
@@ -24,5 +26,6 @@ func (cer *EnvironmentRequest) ToPersistentEnvironment() *Environment {
 type EnvironmentRepository interface {
 	Create(env *Environment) (EnvironmentID, error)
 	GetAll() ([]Environment, error)
+	GetDefault() (*Environment, error)
 	DeleteAll() error
 }

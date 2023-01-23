@@ -20,8 +20,14 @@ func (er *EnvironmentRepository) Create(env *model.Environment) (model.Environme
 
 func (er *EnvironmentRepository) GetAll() ([]model.Environment, error) {
 	envs := make([]model.Environment, 0)
-	resp := er.db.Order("name desc").Find(&envs)
+	resp := er.db.Order("name asc").Find(&envs)
 	return envs, resp.Error
+}
+
+func (er *EnvironmentRepository) GetDefault() (*model.Environment, error) {
+	var environment *model.Environment
+	resp := er.db.First(&environment, "name = ?", model.DefaultEnvironmentName)
+	return environment, resp.Error
 }
 
 func (er *EnvironmentRepository) DeleteAll() error {

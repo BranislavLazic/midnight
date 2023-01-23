@@ -13,7 +13,10 @@ import (
 
 func TestServiceStatusNoStatuses(t *testing.T) {
 	serviceRepo := postgres.NewServiceRepository(testapi.DB)
-	_ = serviceRepo.DeleteAll()
+	err := serviceRepo.DeleteAll()
+	if err != nil {
+		t.Fatalf("failed to delete all services %s", err.Error())
+	}
 	app := testapi.InitTestApp()
 	res, err := app.Test(httptest.NewRequest(fiber.MethodGet, "/v1/status", nil))
 	utils.AssertEqual(t, nil, err, "app.Test(req)")
@@ -27,6 +30,7 @@ func TestServiceStatusNoStatuses(t *testing.T) {
 func TestServiceStatusSingleStatus(t *testing.T) {
 	serviceRepo := postgres.NewServiceRepository(testapi.DB)
 	_ = serviceRepo.DeleteAll()
+	app := testapi.InitTestApp()
 	err := task.SaveServiceStatus(testapi.Cache, task.ServiceStatus{
 		ID:                 1,
 		Name:               "Test service",
@@ -38,7 +42,6 @@ func TestServiceStatusSingleStatus(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to save the service status")
 	}
-	app := testapi.InitTestApp()
 	res, err := app.Test(httptest.NewRequest(fiber.MethodGet, "/v1/status", nil))
 	utils.AssertEqual(t, nil, err, "app.Test(req)")
 	utils.AssertEqual(t, 200, res.StatusCode, "Status code")

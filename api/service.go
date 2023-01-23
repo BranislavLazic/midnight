@@ -14,11 +14,12 @@ import (
 
 type ServiceRoutes struct {
 	serviceRepo   model.ServiceRepository
+	envRepo       model.EnvironmentRepository
 	taskScheduler *task.Scheduler
 }
 
-func NewServiceRoutes(serviceRepo model.ServiceRepository, taskScheduler *task.Scheduler) *ServiceRoutes {
-	return &ServiceRoutes{serviceRepo: serviceRepo, taskScheduler: taskScheduler}
+func NewServiceRoutes(serviceRepo model.ServiceRepository, envRepo model.EnvironmentRepository, taskScheduler *task.Scheduler) *ServiceRoutes {
+	return &ServiceRoutes{serviceRepo: serviceRepo, envRepo: envRepo, taskScheduler: taskScheduler}
 }
 
 // CreateService godoc
@@ -44,7 +45,12 @@ func (sr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
 			Status(http.StatusConflict).
 			JSON(map[string]string{"error": fmt.Sprintf("A service for url %s is already registered", serviceRequest.URL)})
 	}
-	ID, err := sr.serviceRepo.Create(serviceRequest.ToPersistentService(0))
+	defaultEnv, err := sr.envRepo.GetDefault()
+	if err != nil {
+		log.Error().Err(err).Msg("default env. not found")
+		return ctx.Status(http.StatusConflict).JSON(map[string]string{"error": "Default environment not found."})
+	}
+	ID, err := sr.serviceRepo.Create(serviceRequest.ToPersistentService(0, defaultEnv))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create a service")
 		return ctx.SendStatus(http.StatusInternalServerError)
@@ -85,7 +91,12 @@ func (sr *ServiceRoutes) UpdateService(ctx *fiber.Ctx) error {
 	if err := validator.New().Struct(serviceRequest); err != nil {
 		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
 	}
-	err = sr.serviceRepo.Update(serviceRequest.ToPersistentService(model.ServiceID(ID)))
+	defaultEnv, err := sr.envRepo.GetDefault()
+	if err != nil {
+		log.Error().Err(err).Msg("default env. not found")
+		return ctx.Status(http.StatusConflict).JSON(map[string]string{"error": "Default environment not found."})
+	}
+	err = sr.serviceRepo.Update(serviceRequest.ToPersistentService(model.ServiceID(ID), defaultEnv))
 	if err != nil {
 		return ctx.SendStatus(http.StatusInternalServerError)
 	}

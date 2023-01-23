@@ -5,18 +5,21 @@ import "strings"
 type ServiceID int64
 
 type Service struct {
-	ID                   ServiceID `gorm:"primaryKey;autoIncrement" json:"id"`
-	Name                 string    `gorm:"type:VARCHAR(255)" json:"name"`
-	URL                  string    `json:"url"`
-	ResponseBody         string    `json:"responseBody"`
-	CheckIntervalSeconds int       `json:"checkIntervalSeconds"`
+	ID                   ServiceID      `gorm:"primaryKey;autoIncrement" json:"id"`
+	EnvironmentID        *EnvironmentID `json:"-"`
+	Environment          *Environment   `gorm:"foreignKey:EnvironmentID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"environment,omitempty"`
+	Name                 string         `gorm:"type:VARCHAR(255)" json:"name"`
+	URL                  string         `json:"url"`
+	ResponseBody         string         `json:"responseBody"`
+	CheckIntervalSeconds int            `json:"checkIntervalSeconds"`
 }
 
 type ServiceRequest struct {
-	Name                 string `json:"name" validate:"max=255"`
-	URL                  string `json:"url" validate:"required,max=4096"`
-	ResponseBody         string `json:"responseBody" validate:"max=8192"`
-	CheckIntervalSeconds int    `json:"checkIntervalSeconds" validate:"required,max=1000000"`
+	Name                 string         `json:"name" validate:"max=255"`
+	EnvironmentID        *EnvironmentID `json:"environmentId"`
+	URL                  string         `json:"url" validate:"required,max=4096"`
+	ResponseBody         string         `json:"responseBody" validate:"max=8192"`
+	CheckIntervalSeconds int            `json:"checkIntervalSeconds" validate:"required,max=1000000"`
 }
 
 func (sr *ServiceRequest) Sanitize() {
@@ -25,10 +28,11 @@ func (sr *ServiceRequest) Sanitize() {
 	sr.ResponseBody = strings.TrimSpace(sr.ResponseBody)
 }
 
-func (sr *ServiceRequest) ToPersistentService(ID ServiceID) *Service {
+func (sr *ServiceRequest) ToPersistentService(ID ServiceID, env *Environment) *Service {
 	return &Service{
 		ID:                   ID,
 		Name:                 sr.Name,
+		Environment:          env,
 		URL:                  sr.URL,
 		ResponseBody:         sr.ResponseBody,
 		CheckIntervalSeconds: sr.CheckIntervalSeconds,
