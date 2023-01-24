@@ -7,10 +7,10 @@ import (
 	"net/http"
 )
 
-func Authenticated(sessionStore *session.Store, cookieSecretKey string) func(ctx *fiber.Ctx) error {
+func Authenticated(sessionStore *session.Store, secretKey string) func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		secureCookie := ctx.Cookies(sess.SecureCookieName)
-		ok := sess.VerifySessionID(secureCookie, cookieSecretKey)
+		ok := sess.VerifySessionID(secureCookie, secretKey)
 		if !ok {
 			return ctx.SendStatus(http.StatusUnauthorized)
 		}
