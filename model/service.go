@@ -15,11 +15,11 @@ type Service struct {
 }
 
 type ServiceRequest struct {
-	Name                 string         `json:"name" validate:"max=255"`
-	EnvironmentID        *EnvironmentID `json:"environmentId"`
-	URL                  string         `json:"url" validate:"required,max=4096"`
-	ResponseBody         string         `json:"responseBody" validate:"max=8192"`
-	CheckIntervalSeconds int            `json:"checkIntervalSeconds" validate:"required,max=1000000"`
+	Name                 string `json:"name" validate:"max=255"`
+	EnvironmentID        int64  `json:"environmentId"`
+	URL                  string `json:"url" validate:"required,max=4096"`
+	ResponseBody         string `json:"responseBody" validate:"max=8192"`
+	CheckIntervalSeconds int    `json:"checkIntervalSeconds" validate:"required,max=1000000"`
 }
 
 func (sr *ServiceRequest) Sanitize() {

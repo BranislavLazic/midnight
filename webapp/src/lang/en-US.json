@@ -9,6 +9,8 @@
   "checkIntervalRequiredError": "Check interval is required",
   "editBoard": "Edit board",
   "editService": "Edit service",
+  "environment": "Environment",
+  "environmentOptional": "Environment (optional)",
   "environments": "Environments",
   "email": "Email",
   "login": "Login",

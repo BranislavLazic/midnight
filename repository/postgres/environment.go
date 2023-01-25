@@ -24,9 +24,9 @@ func (er *EnvironmentRepository) GetAll() ([]model.Environment, error) {
 	return envs, resp.Error
 }
 
-func (er *EnvironmentRepository) GetDefault() (*model.Environment, error) {
+func (er *EnvironmentRepository) GetByID(ID model.EnvironmentID) (*model.Environment, error) {
 	var environment *model.Environment
-	resp := er.db.First(&environment, "name = ?", model.DefaultEnvironmentName)
+	resp := er.db.First(&environment, ID)
 	return environment, resp.Error
 }
 

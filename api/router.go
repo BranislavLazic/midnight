@@ -75,8 +75,9 @@ func InitApp(settings ServerSettings) *fiber.App {
 
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept",
+		AllowOrigins:     "http://localhost:5173",
+		AllowHeaders:     "Origin, Content-Type, Accept",
+		AllowCredentials: true,
 	}))
 	// API routes
 	app.Post("/v1/login", authRoutes.Login)

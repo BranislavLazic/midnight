@@ -4,6 +4,3 @@ alter table services
 
 alter table services
     add constraint environment_id_fkey foreign key (environment_id) references environments (id) on update cascade on delete restrict;
-
-insert into environments (name)
-values ('None');

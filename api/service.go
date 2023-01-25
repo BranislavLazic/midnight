@@ -45,12 +45,14 @@ func (sr *ServiceRoutes) CreateService(ctx *fiber.Ctx) error {
 			Status(http.StatusConflict).
 			JSON(map[string]string{"error": fmt.Sprintf("A service for url %s is already registered", serviceRequest.URL)})
 	}
-	defaultEnv, err := sr.envRepo.GetDefault()
+	env, err := sr.envRepo.GetByID(model.EnvironmentID(serviceRequest.EnvironmentID))
+	var ID model.ServiceID
 	if err != nil {
-		log.Error().Err(err).Msg("default env. not found")
-		return ctx.Status(http.StatusConflict).JSON(map[string]string{"error": "Default environment not found."})
+		log.Warn().Err(err).Msg("environment will not be set")
+		ID, err = sr.serviceRepo.Create(serviceRequest.ToPersistentService(0, nil))
+	} else {
+		ID, err = sr.serviceRepo.Create(serviceRequest.ToPersistentService(0, env))
 	}
-	ID, err := sr.serviceRepo.Create(serviceRequest.ToPersistentService(0, defaultEnv))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create a service")
 		return ctx.SendStatus(http.StatusInternalServerError)
@@ -91,12 +93,13 @@ func (sr *ServiceRoutes) UpdateService(ctx *fiber.Ctx) error {
 	if err := validator.New().Struct(serviceRequest); err != nil {
 		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
 	}
-	defaultEnv, err := sr.envRepo.GetDefault()
+	env, err := sr.envRepo.GetByID(model.EnvironmentID(serviceRequest.EnvironmentID))
 	if err != nil {
-		log.Error().Err(err).Msg("default env. not found")
-		return ctx.Status(http.StatusConflict).JSON(map[string]string{"error": "Default environment not found."})
+		log.Warn().Err(err).Msg("environment will not be set")
+		err = sr.serviceRepo.Update(serviceRequest.ToPersistentService(model.ServiceID(ID), nil))
+	} else {
+		err = sr.serviceRepo.Update(serviceRequest.ToPersistentService(model.ServiceID(ID), env))
 	}
-	err = sr.serviceRepo.Update(serviceRequest.ToPersistentService(model.ServiceID(ID), defaultEnv))
 	if err != nil {
 		return ctx.SendStatus(http.StatusInternalServerError)
 	}

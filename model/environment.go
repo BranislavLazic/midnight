@@ -2,8 +2,6 @@ package model
 
 import "strings"
 
-const DefaultEnvironmentName = "None"
-
 type EnvironmentID int64
 
 type Environment struct {
@@ -26,6 +24,6 @@ func (cer *EnvironmentRequest) ToPersistentEnvironment() *Environment {
 type EnvironmentRepository interface {
 	Create(env *Environment) (EnvironmentID, error)
 	GetAll() ([]Environment, error)
-	GetDefault() (*Environment, error)
+	GetByID(ID EnvironmentID) (*Environment, error)
 	DeleteAll() error
 }

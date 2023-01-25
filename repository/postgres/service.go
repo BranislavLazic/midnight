@@ -24,13 +24,13 @@ func (psr *ServiceRepository) Update(service *model.Service) error {
 
 func (psr *ServiceRepository) GetAll() ([]model.Service, error) {
 	services := make([]model.Service, 0)
-	resp := psr.db.Order("id desc").Find(&services)
+	resp := psr.db.Order("id desc").Preload("Environment").Find(&services)
 	return services, resp.Error
 }
 
 func (psr *ServiceRepository) GetById(ID model.ServiceID) (*model.Service, error) {
 	var service *model.Service
-	resp := psr.db.First(&service, ID)
+	resp := psr.db.Model(&model.Service{}).Preload("Environment").First(&service, ID)
 	return service, resp.Error
 }
 

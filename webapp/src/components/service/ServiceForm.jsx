@@ -1,4 +1,4 @@
-import { Label, TextInput, Button, Textarea } from 'flowbite-react';
+import { Label, TextInput, Button, Textarea, Select } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 
 const initialFormValues = {
   name: '',
+  environmentId: '',
   url: '',
   responseBody: '',
   checkIntervalSeconds: 5,
@@ -19,6 +20,7 @@ const ServiceForm = () => {
   const intl = useIntl();
   const navigate = useNavigate();
   const [service, setService] = useState();
+  const [environments, setEnvironments] = useState([]);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -26,11 +28,20 @@ const ServiceForm = () => {
     initialValues: initialFormValues,
     onSubmit: async (values) => {
       try {
+        const { environmentId } = values;
+        const correctedValues = {
+          ...values,
+          environmentId: Number(environmentId),
+        };
         if (!service) {
-          await axios.post(`${BASE_URL}/v1/services`, values);
+          await axios.post(`${BASE_URL}/v1/services`, correctedValues, {
+            withCredentials: true,
+          });
           formik.resetForm();
         } else {
-          await axios.put(`${BASE_URL}/v1/services/${id}`, values);
+          await axios.put(`${BASE_URL}/v1/services/${id}`, correctedValues, {
+            withCredentials: true,
+          });
           navigate('/dashboard');
         }
       } catch (e) {
@@ -40,12 +51,29 @@ const ServiceForm = () => {
   });
 
   useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await axios.get(`${BASE_URL}/v1/environments`);
+        setEnvironments(data);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     if (id) {
       (async () => {
         try {
-          const { data } = await axios.get(`${BASE_URL}/v1/services/${id}`);
+          const { data } = await axios.get(`${BASE_URL}/v1/services/${id}`, {
+            withCredentials: true,
+          });
           setService(data);
-          await formik.setValues(data);
+          const transformedData = {
+            environmentId: data?.environment?.id,
+            ...data,
+          };
+          await formik.setValues(transformedData);
         } catch (e) {
           console.error(e);
         }
@@ -99,6 +127,26 @@ const ServiceForm = () => {
                   {formik.errors.name}
                 </span>
               )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="environment"
+              value={intl.formatMessage({ id: 'environmentOptional' })}
+            />
+            <Select
+              id="environment"
+              name="environmentId"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.environmentId || 0}
+            >
+              <option value={0}></option>
+              {environments.map((env, idx) => (
+                <option key={idx} value={env.id}>
+                  {env.name}
+                </option>
+              ))}
+            </Select>
           </div>
           <div className="flex flex-col gap-2">
             <Label

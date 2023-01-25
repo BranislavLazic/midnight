@@ -23,7 +23,9 @@ const ServiceTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/v1/services/${id}`);
+      await axios.delete(`${BASE_URL}/v1/services/${id}`, {
+        withCredentials: true,
+      });
       const { data } = await axios.get(`${BASE_URL}/v1/services`);
       setServices(data);
     } catch (e) {
@@ -54,6 +56,9 @@ const ServiceTable = () => {
             </Table.HeadCell>
             <Table.HeadCell>{intl.formatMessage({ id: 'url' })}</Table.HeadCell>
             <Table.HeadCell>
+              {intl.formatMessage({ id: 'environment' })}
+            </Table.HeadCell>
+            <Table.HeadCell>
               {intl.formatMessage({ id: 'checkIntervalSeconds' })}
             </Table.HeadCell>
             <Table.HeadCell>
@@ -71,6 +76,9 @@ const ServiceTable = () => {
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   {s.url}
+                </Table.Cell>
+                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                  {s?.environment?.name || '-'}
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   {s.checkIntervalSeconds}
