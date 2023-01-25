@@ -15,6 +15,8 @@ const SecureCookieName = "session_id"
 
 const sessionIDLength = 20
 
+const sessionIDSignatureDelimiter = "."
+
 func GenerateSessionID(secret string) (string, error) {
 	// Generate random string
 	charSet := "abcdedfghijklmnopqrstABCDEFGHIJKLMNOP123456789_"
@@ -34,7 +36,7 @@ func GenerateSessionID(secret string) (string, error) {
 	// base64 encode signature
 	signature := base64.URLEncoding.EncodeToString(mac.Sum(nil))
 	// Concat random string with its signature using "|" as delimiter
-	signedToken := []byte(fmt.Sprintf("%s|%s", tok, signature))
+	signedToken := []byte(fmt.Sprintf("%s%s%s", tok, sessionIDSignatureDelimiter, signature))
 	// base64 the whole signed token
 	return base64.URLEncoding.EncodeToString(signedToken), nil
 }
@@ -43,7 +45,7 @@ func VerifySessionID(sessionID, secret string) bool {
 	// base64 decode the whole sessionID
 	dec, _ := base64.URLEncoding.DecodeString(sessionID)
 	// Split it for "|" delimiter
-	tokParts := strings.Split(string(dec), "|")
+	tokParts := strings.Split(string(dec), sessionIDSignatureDelimiter)
 	// It should contain two parts. Random string and signature
 	if len(tokParts) != 2 {
 		return false
