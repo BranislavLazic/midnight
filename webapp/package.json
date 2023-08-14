@@ -9,14 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
     "autoprefixer": "^10.4.13",
     "axios": "^1.2.2",
-    "flowbite": "^1.6.2",
-    "flowbite-react": "^0.3.7",
+    "flowbite": "^1.8.1",
+    "flowbite-react": "^0.5.0",
     "flowbite-typography": "^1.0.3",
     "formik": "^2.2.9",
     "history": "^5.3.0",
-    "phosphor-react": "^1.4.1",
     "postcss": "^8.4.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

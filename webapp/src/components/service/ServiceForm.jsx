@@ -1,5 +1,6 @@
 import { Label, TextInput, Button, Textarea, Select } from 'flowbite-react';
 import { useEffect, useState } from 'react';
+import { BookmarkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
@@ -42,8 +43,8 @@ const ServiceForm = () => {
           await axios.put(`${BASE_URL}/v1/services/${id}`, correctedValues, {
             withCredentials: true,
           });
-          navigate('/dashboard');
         }
+        navigate('/dashboard');
       } catch (e) {
         console.error(e);
       }
@@ -255,7 +256,11 @@ const ServiceForm = () => {
           <div className="flex flex-row gap-4">
             <Link className="flex grow" to="/dashboard">
               <Button color="gray" className="grow">
-                {intl.formatMessage({ id: 'cancel' })}
+                <div className="flex gap-1 items-center">
+                  <XMarkIcon className="h-4 w-4" fontWeight="bold" />
+
+                  {intl.formatMessage({ id: 'cancel' })}
+                </div>
               </Button>
             </Link>
             <Button
@@ -263,7 +268,10 @@ const ServiceForm = () => {
               type="submit"
               onClick={formik.handleSubmit}
             >
-              {intl.formatMessage({ id: 'save' })}
+              <div className="flex gap-1 items-center">
+                <BookmarkIcon className="h-4 w-4" fontWeight="bold" />
+                {intl.formatMessage({ id: 'save' })}
+              </div>
             </Button>
           </div>
         </form>

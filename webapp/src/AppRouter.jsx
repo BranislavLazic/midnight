@@ -1,48 +1,54 @@
 import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
-import StatusPage from './pages/status/StatusPage.jsx';
-import Dashboard from './pages/dashboard/Dashboard.jsx';
-import ServiceTable from './components/service/ServiceTable.jsx';
-import ServiceForm from './components/service/ServiceForm.jsx';
-import LoginPage from './pages/login/LoginPage.jsx';
-import AuthRoute from './components/AuthRoute.jsx';
+import React, { lazy, Suspense } from 'react';
 
 const browserHistory = createBrowserHistory();
+
+const StatusPage = lazy(() => import('./pages/status/StatusPage.jsx'));
+const Dashboard = lazy(() => import('./pages/dashboard/Dashboard.jsx'));
+const ServiceTable = lazy(() =>
+  import('./components/service/ServiceTable.jsx')
+);
+const ServiceForm = lazy(() => import('./components/service/ServiceForm.jsx'));
+const LoginPage = lazy(() => import('./pages/login/LoginPage.jsx'));
+const AuthRoute = lazy(() => import('./components/AuthRoute.jsx'));
 
 const AppRouter = () => {
   return (
     <Router history={browserHistory}>
-      <Routes>
-        <Route path="/" element={<StatusPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route exact path="/dashboard" element={<AuthRoute />}>
+      <Suspense fallback="...">
+        <Routes>
+          <Route path="/" element={<StatusPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route exact path="/dashboard" element={<AuthRoute />}>
+            <Route
+              exact
+              path="/dashboard"
+              element={
+                <Dashboard>
+                  <ServiceTable />
+                </Dashboard>
+              }
+            />
+          </Route>
           <Route
-            exact
-            path="/dashboard"
+            path="/dashboard/services/:id"
             element={
               <Dashboard>
-                <ServiceTable />
+                <ServiceForm />
               </Dashboard>
             }
           />
-        </Route>
-        <Route
-          path="/dashboard/services/:id"
-          element={
-            <Dashboard>
-              <ServiceForm />
-            </Dashboard>
-          }
-        />
-        <Route
-          path="/dashboard/services"
-          element={
-            <Dashboard>
-              <ServiceForm />
-            </Dashboard>
-          }
-        />
-      </Routes>
+          <Route
+            path="/dashboard/services"
+            element={
+              <Dashboard>
+                <ServiceForm />
+              </Dashboard>
+            }
+          />
+        </Routes>
+      </Suspense>
     </Router>
   );
 };

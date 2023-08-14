@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Button, Table } from 'flowbite-react';
-import { Pencil, Plus, Trash } from 'phosphor-react';
+import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { BASE_URL } from '../../../constants.cjs';
 import { useIntl } from 'react-intl';
 
@@ -43,7 +43,7 @@ const ServiceTable = () => {
           <Link to="/dashboard/services">
             <Button>
               <div className="flex gap-1 items-center">
-                <Plus className="h-4 w-4 stroke-2" weight="bold" />
+                <PlusIcon className="h-4 w-4" fontWeight="bold" />
                 <span>{intl.formatMessage({ id: 'add' })}</span>
               </div>
             </Button>
@@ -86,11 +86,11 @@ const ServiceTable = () => {
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white flex gap-2">
                   <Link to={`/dashboard/services/${s.id}`}>
                     <Button color="gray">
-                      <Pencil className="h-4 w-4" weight="bold" />
+                      <PencilIcon className="h-4 w-4" fontWeight="bold" />
                     </Button>
                   </Link>
                   <Button color="gray" onClick={() => handleDelete(s.id)}>
-                    <Trash className="h-4 w-4" weight="bold" />
+                    <TrashIcon className="h-4 w-4" fontWeight="bold" />
                   </Button>
                 </Table.Cell>
               </Table.Row>

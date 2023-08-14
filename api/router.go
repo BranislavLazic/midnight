@@ -3,6 +3,10 @@ package api
 import (
 	"embed"
 	"fmt"
+	"io/fs"
+	"net/http"
+	"time"
+
 	"github.com/branislavlazic/midnight/api/middleware"
 	sess "github.com/branislavlazic/midnight/api/session"
 	"github.com/branislavlazic/midnight/cache"
@@ -19,9 +23,6 @@ import (
 	"github.com/rs/zerolog/log"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"gorm.io/gorm"
-	"io/fs"
-	"net/http"
-	"time"
 )
 
 const sessionStoreTableName = "sessions"
@@ -75,9 +76,10 @@ func InitApp(settings ServerSettings) *fiber.App {
 
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173",
+		AllowOrigins:     "*",
 		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: true,
+		AllowMethods:     "*",
 	}))
 	// API routes
 	app.Post("/v1/login", authRoutes.Login)

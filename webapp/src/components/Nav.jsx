@@ -1,6 +1,9 @@
 import { Button, Checkbox, Dropdown, Label, Navbar } from 'flowbite-react';
 
-import { Pencil, SignOut } from 'phosphor-react';
+import {
+  PencilIcon,
+  ArrowRightOnRectangleIcon,
+} from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { BASE_URL } from '../../constants.cjs';
@@ -90,7 +93,7 @@ const Nav = ({
           <Link to="/dashboard">
             <Button color="light">
               <div className="flex gap-1 items-center">
-                <Pencil className="h-4 w-4" weight="bold" />
+                <PencilIcon className="h-4 w-4" fontWeight="bold" />
                 <span>{intl.formatMessage({ id: 'editBoard' })}</span>
               </div>
             </Button>
@@ -99,7 +102,10 @@ const Nav = ({
         {authUser && (
           <Button color="gray" onClick={handleLogout}>
             <div className="flex gap-1 items-center">
-              <SignOut className="h-4 w-4" weight="bold" />
+              <ArrowRightOnRectangleIcon
+                className="h-4 w-4"
+                fontWeight="bold"
+              />
               <span>{intl.formatMessage({ id: 'logout' })}</span>
             </div>
           </Button>
