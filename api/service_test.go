@@ -1,16 +1,17 @@
 package api_test
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/branislavlazic/midnight/api/session"
 	"github.com/branislavlazic/midnight/api/testapi"
 	"github.com/branislavlazic/midnight/model"
 	"github.com/branislavlazic/midnight/repository/postgres"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestServiceNoData(t *testing.T) {
@@ -25,6 +26,9 @@ func TestServiceNoData(t *testing.T) {
 	utils.AssertEqual(t, 200, res.StatusCode, "Status code")
 
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body")
+	}
 	expectedBody := `[]`
 	utils.AssertEqual(t, expectedBody, string(body), "Body")
 }
@@ -46,6 +50,9 @@ func TestServiceFound(t *testing.T) {
 	utils.AssertEqual(t, 200, res.StatusCode, "Status code")
 
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body")
+	}
 	expectedBody := `[{"id":1,"name":"Test service","url":"http://service.com","responseBody":"{\"status\":\"ok\"}","checkIntervalSeconds":30}]`
 	utils.AssertEqual(t, expectedBody, string(body), "Body")
 }

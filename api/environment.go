@@ -2,12 +2,13 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/branislavlazic/midnight/api/validation"
 	"github.com/branislavlazic/midnight/model"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 type EnvironmentRoutes struct {
