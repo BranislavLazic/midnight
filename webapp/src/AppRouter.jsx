@@ -1,6 +1,7 @@
 import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import React, { lazy, Suspense } from 'react';
+import Loader from './components/Loader.jsx';
 
 const browserHistory = createBrowserHistory();
 
@@ -16,7 +17,7 @@ const AuthRoute = lazy(() => import('./components/AuthRoute.jsx'));
 const AppRouter = () => {
   return (
     <Router history={browserHistory}>
-      <Suspense fallback="...">
+      <Suspense fallback={<Loader />}>
         <Routes>
           <Route path="/" element={<StatusPage />} />
           <Route path="/login" element={<LoginPage />} />

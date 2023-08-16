@@ -2,9 +2,11 @@ package task
 
 import (
 	"encoding/json"
-	"github.com/branislavlazic/midnight/cache"
 	"net/http"
 	"time"
+
+	"github.com/branislavlazic/midnight/cache"
+	"github.com/branislavlazic/midnight/model"
 
 	"github.com/rs/zerolog/log"
 )
@@ -23,19 +25,21 @@ func (rbs ResponseBodyStatus) String() string {
 }
 
 type ServiceStatus struct {
-	ID                 int64  `json:"id"`
-	Name               string `json:"name"`
-	URL                string `json:"url"`
-	ResponseBodyStatus string `json:"responseBodyStatus"`
-	Version            string `json:"version,omitempty"`
-	Status             string `json:"status"`
-	StatusCode         int    `json:"statusCode"`
+	ID                 int64              `json:"id"`
+	Name               string             `json:"name"`
+	URL                string             `json:"url"`
+	Environment        *model.Environment `json:"environment,omitempty"`
+	ResponseBodyStatus string             `json:"responseBodyStatus"`
+	Version            string             `json:"version,omitempty"`
+	Status             string             `json:"status"`
+	StatusCode         int                `json:"statusCode"`
 }
 
 type Config struct {
 	ID           int64
 	Name         string
 	URL          string
+	Environment  *model.Environment
 	ResponseBody string
 	Timeout      int
 }
@@ -68,7 +72,7 @@ func (tp *Provider) NewTask(config Config) func() {
 			log.Warn().Err(err).Msg("failed to get a response")
 			err := SaveServiceStatus(
 				tp.cache,
-				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Status: "404 Not Found", StatusCode: 404},
+				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Environment: config.Environment, Status: "404 Not Found", StatusCode: 404},
 			)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to set the task")
@@ -78,7 +82,7 @@ func (tp *Provider) NewTask(config Config) func() {
 			var serviceStatusResponse string
 			err := json.NewDecoder(res.Body).Decode(&serviceStatusResponse)
 			if err != nil {
-				//log.Debug().Err(err).Msg("failed to extract the request body")
+				log.Debug().Err(err).Msg("failed to extract the request body")
 			}
 			var responseBodyStatus string
 			if len(config.ResponseBody) == 0 || serviceStatusResponse == config.ResponseBody {
@@ -88,7 +92,7 @@ func (tp *Provider) NewTask(config Config) func() {
 			}
 			err = SaveServiceStatus(
 				tp.cache,
-				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, ResponseBodyStatus: responseBodyStatus, Status: res.Status, StatusCode: res.StatusCode},
+				ServiceStatus{ID: config.ID, Name: config.Name, URL: config.URL, Environment: config.Environment, ResponseBodyStatus: responseBodyStatus, Status: res.Status, StatusCode: res.StatusCode},
 			)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to set the task")

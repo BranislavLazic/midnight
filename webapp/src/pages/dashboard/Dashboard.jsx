@@ -15,9 +15,12 @@ const Dashboard = ({ children }) => {
               <li>
                 <Link
                   to="/dashboard"
-                  className="flex items-center rounded-lg p-2 text-base font-normal text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  className="relative flex items-center rounded-lg p-2 text-base font-normal text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
-                  {intl.formatMessage({ id: 'services' })}
+                  <span className="absolute inset-y-0 left-0 w-2 bg-cyan-600 rounded-lg"></span>
+                  <span className="ml-4">
+                    {intl.formatMessage({ id: 'services' })}
+                  </span>
                 </Link>
               </li>
             </Sidebar.ItemGroup>

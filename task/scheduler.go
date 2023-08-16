@@ -1,10 +1,11 @@
 package task
 
 import (
+	"strconv"
+
 	"github.com/branislavlazic/midnight/model"
 	"github.com/go-co-op/gocron"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 type Scheduler struct {
@@ -28,7 +29,7 @@ func (s *Scheduler) RunAll() error {
 		log.Info().Msgf(
 			"initializing service %service at %service - check every %d seconds", service.Name, service.URL, service.CheckIntervalSeconds,
 		)
-		taskConfig := Config{ID: int64(service.ID), Name: service.Name, URL: service.URL, ResponseBody: service.ResponseBody, Timeout: service.CheckIntervalSeconds}
+		taskConfig := Config{ID: int64(service.ID), Name: service.Name, URL: service.URL, Environment: service.Environment, ResponseBody: service.ResponseBody, Timeout: service.CheckIntervalSeconds}
 		_, err := s.scheduler.Every(service.CheckIntervalSeconds).
 			Tag(strconv.FormatInt(int64(service.ID), 10)).
 			Seconds().
