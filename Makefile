@@ -11,7 +11,7 @@ swag:
 
 test: frontend
 	docker-compose up -d postgres_test
-	go test -count=1 -cover -v ./...
+	go test -count=1 -p=1 -cover -v ./...
 	go test github.com/branislavlazic/midnight/api/session -fuzz=FuzzVerifySessionID -fuzztime=10s
 	docker-compose stop postgres_test
 
