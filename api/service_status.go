@@ -2,11 +2,12 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/branislavlazic/midnight/cache"
-	"github.com/branislavlazic/midnight/task"
-	"github.com/gofiber/fiber/v2"
 	"net/http"
 	"sort"
+
+	"github.com/branislavlazic/midnight/cache"
+	"github.com/branislavlazic/midnight/task"
+	"github.com/labstack/echo/v4"
 )
 
 type ServiceStatusRoutes struct {
@@ -22,16 +23,16 @@ func NewServiceStatusRoutes(cache cache.Internal) *ServiceStatusRoutes {
 // @Failure 404
 // @Success 200
 // @Router /v1/status [get]
-func (lr *ServiceStatusRoutes) GetStatus(ctx *fiber.Ctx) error {
+func (lr *ServiceStatusRoutes) GetStatus(ctx echo.Context) error {
 	bytes, err := lr.cache.Get(task.ServiceStatusCacheName)
 	if err != nil {
-		return ctx.Status(http.StatusOK).JSON([]task.ServiceStatus{})
+		return ctx.JSON(http.StatusOK, []task.ServiceStatus{})
 	}
 	serviceStatuses, err := sortServiceStatuses(bytes)
 	if err != nil {
-		return ctx.SendStatus(http.StatusInternalServerError)
+		return ctx.NoContent(http.StatusInternalServerError)
 	}
-	return ctx.Status(http.StatusOK).JSON(serviceStatuses)
+	return ctx.JSON(http.StatusOK, serviceStatuses)
 }
 
 func sortServiceStatuses(bytes []byte) ([]task.ServiceStatus, error) {

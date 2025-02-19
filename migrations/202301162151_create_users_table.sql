@@ -1,7 +1,9 @@
 -- +goose Up
+create extension pgcrypto;
+
 create table if not exists users
 (
-    id       serial primary key,
+    id       uuid primary key default gen_random_uuid(),
     email    varchar(255) not null,
     password varchar(255) not null,
     role     varchar(255) not null,

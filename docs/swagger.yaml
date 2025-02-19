@@ -1,4 +1,9 @@
 definitions:
+  model.EnvironmentRequest:
+    properties:
+      name:
+        type: string
+    type: object
   model.LoginRequest:
     properties:
       email:
@@ -14,8 +19,13 @@ definitions:
       checkIntervalSeconds:
         maximum: 1000000
         type: integer
+      environmentId:
+        type: integer
       name:
         maxLength: 255
+        type: string
+      responseBody:
+        maxLength: 8192
         type: string
       url:
         maxLength: 4096
@@ -27,6 +37,32 @@ definitions:
 info:
   contact: {}
 paths:
+  /v1/environments:
+    get:
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: Get all environments
+    post:
+      parameters:
+      - description: Environment request body
+        in: body
+        name: environmentRequest
+        required: true
+        schema:
+          $ref: '#/definitions/model.EnvironmentRequest'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Create an environment
   /v1/login:
     post:
       parameters:
@@ -48,14 +84,6 @@ paths:
         "422":
           description: Unprocessable Entity
       summary: Login
-  /v1/logout:
-    post:
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-      summary: Logout
   /v1/services:
     get:
       responses:

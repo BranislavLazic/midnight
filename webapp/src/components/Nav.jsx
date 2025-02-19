@@ -1,14 +1,11 @@
 import { Button, Checkbox, Dropdown, Label, Navbar } from 'flowbite-react';
 
-import {
-  PencilIcon,
-  ArrowRightOnRectangleIcon,
-} from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { BASE_URL } from '../../constants.cjs';
 import { useIntl } from 'react-intl';
 import { useEffect, useState } from 'react';
+import { PencilSimple, SignOut } from '@phosphor-icons/react';
 
 const Nav = ({
   editBoardButtonShown = false,
@@ -17,7 +14,7 @@ const Nav = ({
   const intl = useIntl();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const authUser = localStorage.getItem('authUser');
+  const authUser = sessionStorage.getItem('authUser');
   const [environments, setEnvironments] = useState([]);
   const [selectedEnvironmentNames, setSelectedEnvironmentNames] = useState([]);
 
@@ -38,10 +35,10 @@ const Nav = ({
     onEnvironmentChange(envQueryParams);
   }, [selectedEnvironmentNames]);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      await axios.post(`${BASE_URL}/v1/logout`);
-      localStorage.removeItem('authUser');
+      sessionStorage.removeItem('authUser');
+      sessionStorage.removeItem('accessToken');
       navigate('/');
     } catch (e) {
       console.error(e);
@@ -93,7 +90,7 @@ const Nav = ({
           <Link to="/dashboard">
             <Button color="light">
               <div className="flex gap-1 items-center">
-                <PencilIcon className="h-4 w-4" fontWeight="bold" />
+                <PencilSimple className="h-4 w-4" weight="bold" />
                 <span>{intl.formatMessage({ id: 'editBoard' })}</span>
               </div>
             </Button>
@@ -102,10 +99,7 @@ const Nav = ({
         {authUser && (
           <Button color="gray" onClick={handleLogout}>
             <div className="flex gap-1 items-center">
-              <ArrowRightOnRectangleIcon
-                className="h-4 w-4"
-                fontWeight="bold"
-              />
+              <SignOut className="h-4 w-4" weight="bold" />
               <span>{intl.formatMessage({ id: 'logout' })}</span>
             </div>
           </Button>

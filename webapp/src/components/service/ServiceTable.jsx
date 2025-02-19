@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Table } from 'flowbite-react';
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { BASE_URL } from '../../../constants.cjs';
 import { useIntl } from 'react-intl';
+import { authorized } from '../../lib/authorized.js';
+import { PencilSimple, Plus, Trash } from '@phosphor-icons/react';
 
 const ServiceTable = () => {
   const intl = useIntl();
@@ -13,7 +13,7 @@ const ServiceTable = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axios.get(`${BASE_URL}/v1/services`);
+        const { data } = await authorized.get(`${BASE_URL}/v1/services`);
         setServices(data);
       } catch (e) {
         console.error(e);
@@ -23,10 +23,8 @@ const ServiceTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/v1/services/${id}`, {
-        withCredentials: true,
-      });
-      const { data } = await axios.get(`${BASE_URL}/v1/services`);
+      await authorized.delete(`${BASE_URL}/v1/services/${id}`);
+      const { data } = await authorized.get(`${BASE_URL}/v1/services`);
       setServices(data);
     } catch (e) {
       console.error(e);
@@ -43,7 +41,7 @@ const ServiceTable = () => {
           <Link to="/dashboard/services">
             <Button>
               <div className="flex gap-1 items-center">
-                <PlusIcon className="h-4 w-4" fontWeight="bold" />
+                <Plus className="h-4 w-4" weight="bold" />
                 <span>{intl.formatMessage({ id: 'add' })}</span>
               </div>
             </Button>
@@ -86,11 +84,11 @@ const ServiceTable = () => {
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white flex gap-2">
                   <Link to={`/dashboard/services/${s.id}`}>
                     <Button color="gray">
-                      <PencilIcon className="h-4 w-4" fontWeight="bold" />
+                      <PencilSimple className="h-4 w-4" weight="bold" />
                     </Button>
                   </Link>
                   <Button color="gray" onClick={() => handleDelete(s.id)}>
-                    <TrashIcon className="h-4 w-4" fontWeight="bold" />
+                    <Trash className="h-4 w-4" weight="bold" />
                   </Button>
                 </Table.Cell>
               </Table.Row>

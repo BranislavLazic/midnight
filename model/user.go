@@ -1,9 +1,11 @@
 package model
 
-type UserID int64
+import "github.com/google/uuid"
+
+type UserID struct{ uuid.UUID }
 
 type User struct {
-	ID       UserID `gorm:"primaryKey,autoIncrement" json:"-"`
+	ID       UserID `gorm:"primaryKey" json:"id"`
 	Email    string `gorm:"VARCHAR(255)" json:"email"`
 	Password string `gorm:"VARCHAR(255)" json:"-"`
 	Role     string `gorm:"VARCHAR(255)" json:"role"`
@@ -13,9 +15,4 @@ type User struct {
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`
-}
-
-type UserRepository interface {
-	Create(user *User) (UserID, error)
-	GetByEmail(email string) (*User, error)
 }

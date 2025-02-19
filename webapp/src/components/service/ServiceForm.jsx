@@ -1,12 +1,12 @@
-import { Label, TextInput, Button, Textarea, Select } from 'flowbite-react';
-import { useEffect, useState } from 'react';
-import { BookmarkIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import { Button, Label, Select, Textarea, TextInput } from 'flowbite-react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { validationSchema } from './validation/validation';
 import { BASE_URL } from '../../../constants.cjs';
 import { useIntl } from 'react-intl';
+import { authorized } from '../../lib/authorized.js';
+import { BookmarkSimple, X } from '@phosphor-icons/react';
 
 const initialFormValues = {
   name: '',
@@ -35,14 +35,13 @@ const ServiceForm = () => {
           environmentId: Number(environmentId),
         };
         if (!service) {
-          await axios.post(`${BASE_URL}/v1/services`, correctedValues, {
-            withCredentials: true,
-          });
+          await authorized.post(`${BASE_URL}/v1/services`, correctedValues);
           formik.resetForm();
         } else {
-          await axios.put(`${BASE_URL}/v1/services/${id}`, correctedValues, {
-            withCredentials: true,
-          });
+          await authorized.put(
+            `${BASE_URL}/v1/services/${id}`,
+            correctedValues
+          );
         }
         navigate('/dashboard');
       } catch (e) {
@@ -51,10 +50,14 @@ const ServiceForm = () => {
     },
   });
 
+  const handleCancel = useCallback(() => {
+    navigate('/dashboard');
+  }, [navigate]);
+
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axios.get(`${BASE_URL}/v1/environments`);
+        const { data } = await authorized.get(`${BASE_URL}/v1/environments`);
         setEnvironments(data);
       } catch (e) {
         console.error(e);
@@ -66,9 +69,9 @@ const ServiceForm = () => {
     if (id) {
       (async () => {
         try {
-          const { data } = await axios.get(`${BASE_URL}/v1/services/${id}`, {
-            withCredentials: true,
-          });
+          const { data } = await authorized.get(
+            `${BASE_URL}/v1/services/${id}`
+          );
           setService(data);
           const transformedData = {
             environmentId: data?.environment?.id,
@@ -254,22 +257,19 @@ const ServiceForm = () => {
               )}
           </div>
           <div className="flex flex-row gap-4">
-            <Link className="flex grow" to="/dashboard">
-              <Button color="gray" className="grow">
-                <div className="flex gap-1 items-center">
-                  <XMarkIcon className="h-4 w-4" fontWeight="bold" />
-
-                  {intl.formatMessage({ id: 'cancel' })}
-                </div>
-              </Button>
-            </Link>
+            <Button color="gray" className="grow" onClick={handleCancel}>
+              <div className="flex gap-1 items-center">
+                <X className="h-4 w-4" weight="bold" />
+                {intl.formatMessage({ id: 'cancel' })}
+              </div>
+            </Button>
             <Button
               className="grow"
               type="submit"
               onClick={formik.handleSubmit}
             >
               <div className="flex gap-1 items-center">
-                <BookmarkIcon className="h-4 w-4" fontWeight="bold" />
+                <BookmarkSimple className="h-4 w-4" weight="bold" />
                 {intl.formatMessage({ id: 'save' })}
               </div>
             </Button>

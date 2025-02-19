@@ -2,36 +2,37 @@ package task_test
 
 import (
 	"context"
+	"strconv"
+	"testing"
+	"time"
+
 	"github.com/allegro/bigcache/v3"
 	"github.com/branislavlazic/midnight/api/testapi"
 	"github.com/branislavlazic/midnight/model"
 	"github.com/branislavlazic/midnight/repository/postgres"
 	"github.com/branislavlazic/midnight/task"
 	"github.com/go-co-op/gocron"
-	"strconv"
-	"testing"
-	"time"
 )
 
 func TestSchedulerRunAll(t *testing.T) {
-	serviceRepo := postgres.NewServiceRepository(testapi.DB)
+	repo := postgres.NewRepository(testapi.DB)
 	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 	if err != nil {
 		t.Fatalf("failed to initialize cache %s", err.Error())
 	}
-	err = serviceRepo.DeleteAll()
+	err = repo.DeleteAllServices()
 	if err != nil {
 		t.Fatalf("failed to delete all services")
 	}
 	serviceID := model.ServiceID(1)
 	service := &model.Service{ID: serviceID, Name: "test service", URL: "http://testtest1", CheckIntervalSeconds: 5}
-	_, err = serviceRepo.Create(service)
+	_, err = repo.CreateService(service)
 	if err != nil {
 		t.Fatalf("failed to create the service %s", err.Error())
 	}
 	scheduler := gocron.NewScheduler(time.UTC)
 	taskProvider := task.NewProvider(cache)
-	taskScheduler := task.NewScheduler(scheduler, taskProvider, serviceRepo)
+	taskScheduler := task.NewScheduler(scheduler, taskProvider, repo)
 	err = taskScheduler.RunAll()
 	if err != nil {
 		t.Fatalf("failed to run all tasks %s", err.Error())
@@ -49,14 +50,14 @@ func TestSchedulerRunAll(t *testing.T) {
 }
 
 func TestSchedulerAddTask(t *testing.T) {
-	serviceRepo := postgres.NewServiceRepository(testapi.DB)
+	repo := postgres.NewRepository(testapi.DB)
 	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(24*time.Hour))
 	if err != nil {
 		t.Fatalf("failed to initialize cache %s", err.Error())
 	}
 	scheduler := gocron.NewScheduler(time.UTC)
 	taskProvider := task.NewProvider(cache)
-	taskScheduler := task.NewScheduler(scheduler, taskProvider, serviceRepo)
+	taskScheduler := task.NewScheduler(scheduler, taskProvider, repo)
 	taskID := int64(1)
 	cfg := task.Config{ID: taskID, Name: "test config", URL: "http://testtest1", Timeout: 10}
 	err = taskScheduler.Add(cfg, 10)

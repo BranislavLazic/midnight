@@ -1,7 +1,8 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
 const AuthRoute = () => {
-  const isAuthenticated = localStorage.getItem('authUser');
+  const isAuthenticated =
+    sessionStorage.getItem('authUser') && sessionStorage.getItem('accessToken');
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
 };
 

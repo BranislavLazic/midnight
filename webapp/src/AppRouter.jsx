@@ -1,4 +1,4 @@
-import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import React, { lazy, Suspense } from 'react';
 import Loader from './components/Loader.jsx';
@@ -19,12 +19,12 @@ const AppRouter = () => {
     <Router history={browserHistory}>
       <Suspense fallback={<Loader />}>
         <Routes>
-          <Route path="/" element={<StatusPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route exact path="/dashboard" element={<AuthRoute />}>
+          <Route path='/' element={<StatusPage />} />
+          <Route path='/login' element={<LoginPage />} />
+          <Route exact path='/dashboard' element={<AuthRoute />}>
             <Route
               exact
-              path="/dashboard"
+              path='/dashboard'
               element={
                 <Dashboard>
                   <ServiceTable />
@@ -32,22 +32,26 @@ const AppRouter = () => {
               }
             />
           </Route>
-          <Route
-            path="/dashboard/services/:id"
-            element={
-              <Dashboard>
-                <ServiceForm />
-              </Dashboard>
-            }
-          />
-          <Route
-            path="/dashboard/services"
-            element={
-              <Dashboard>
-                <ServiceForm />
-              </Dashboard>
-            }
-          />
+          <Route exact path='/dashboard/services/:id' element={<AuthRoute />}>
+            <Route
+              path='/dashboard/services/:id'
+              element={
+                <Dashboard>
+                  <ServiceForm />
+                </Dashboard>
+              }
+            />
+          </Route>
+          <Route exact path='/dashboard/services' element={<AuthRoute />}>
+            <Route
+              path='/dashboard/services'
+              element={
+                <Dashboard>
+                  <ServiceForm />
+                </Dashboard>
+              }
+            />
+          </Route>
         </Routes>
       </Suspense>
     </Router>

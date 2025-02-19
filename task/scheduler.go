@@ -3,7 +3,7 @@ package task
 import (
 	"strconv"
 
-	"github.com/branislavlazic/midnight/model"
+	"github.com/branislavlazic/midnight/repository/postgres"
 	"github.com/go-co-op/gocron"
 	"github.com/rs/zerolog/log"
 )
@@ -11,17 +11,17 @@ import (
 type Scheduler struct {
 	scheduler    *gocron.Scheduler
 	taskProvider *Provider
-	serviceRepo  model.ServiceRepository
+	repo         *postgres.Repository
 }
 
-func NewScheduler(scheduler *gocron.Scheduler, taskProvider *Provider, serviceRepo model.ServiceRepository) *Scheduler {
-	return &Scheduler{scheduler: scheduler, taskProvider: taskProvider, serviceRepo: serviceRepo}
+func NewScheduler(scheduler *gocron.Scheduler, taskProvider *Provider, repo *postgres.Repository) *Scheduler {
+	return &Scheduler{scheduler: scheduler, taskProvider: taskProvider, repo: repo}
 }
 
 // RunAll reads services settings, creates task configurations,
 // spawns jobs, and runs the scheduler in the end.
 func (s *Scheduler) RunAll() error {
-	services, err := s.serviceRepo.GetAll()
+	services, err := s.repo.GetAllServices()
 	if err != nil {
 		return err
 	}

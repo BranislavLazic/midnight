@@ -1,25 +1,41 @@
 package api
 
 import (
-	secureSession "github.com/branislavlazic/midnight/api/session"
-	"github.com/branislavlazic/midnight/api/validation"
-	"github.com/branislavlazic/midnight/model"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
+
+	"github.com/branislavlazic/midnight/api/validation"
+	"github.com/branislavlazic/midnight/config"
+	"github.com/branislavlazic/midnight/model"
+	"github.com/branislavlazic/midnight/repository/postgres"
+	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthRoutes struct {
-	userRepo     model.UserRepository
-	sessionStore *session.Store
+const tokenValidityDuration = time.Minute * 30
+
+type jwtCustomClaims struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+	jwt.RegisteredClaims
 }
 
-func NewAuthRoutes(userRepo model.UserRepository, sessionStore *session.Store) *AuthRoutes {
-	return &AuthRoutes{userRepo: userRepo, sessionStore: sessionStore}
+type jwtAuthResponse struct {
+	AuthUser    model.User `json:"authUser"`
+	AccessToken string     `json:"accessToken"`
+}
+
+type AuthRoutes struct {
+	repo   *postgres.Repository
+	config *config.AppConfig
+}
+
+func NewAuthRoutes(repo *postgres.Repository, config *config.AppConfig) *AuthRoutes {
+	return &AuthRoutes{repo: repo, config: config}
 }
 
 // Login godoc
@@ -28,56 +44,41 @@ func NewAuthRoutes(userRepo model.UserRepository, sessionStore *session.Store) *
 // @Failure 400,401,404,422
 // @Success 200
 // @Router /v1/login [post]
-func (ar *AuthRoutes) Login(ctx *fiber.Ctx) error {
+func (ar *AuthRoutes) Login(ctx echo.Context) error {
 	var loginRequest *model.LoginRequest
-	if err := ctx.BodyParser(&loginRequest); err != nil {
+	if err := ctx.Bind(&loginRequest); err != nil {
 		log.Debug().Err(err).Msg("failed to parse the request as login request")
-		return ctx.SendStatus(http.StatusBadRequest)
+		return ctx.NoContent(http.StatusBadRequest)
 	}
 	err := validator.New().Struct(loginRequest)
 	if err != nil {
-		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
+		return ctx.JSON(http.StatusUnprocessableEntity, validation.ToValidationErrors(err.(validator.ValidationErrors)))
 	}
-	user, err := ar.userRepo.GetByEmail(loginRequest.Email)
+	user, err := ar.repo.GetUserByEmail(loginRequest.Email)
 	if err != nil {
 		log.Debug().Err(err).Msgf("failed to find the user by email %s", loginRequest.Email)
-		return ctx.SendStatus(http.StatusNotFound)
+		return ctx.NoContent(http.StatusNotFound)
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password))
 	if err != nil {
 		log.Debug().Err(err).Msgf("incorrect password")
-		return ctx.SendStatus(http.StatusUnauthorized)
+		return ctx.NoContent(http.StatusUnauthorized)
 	}
-	sess, err := ar.sessionStore.Get(ctx)
+	claims := &jwtCustomClaims{
+		ID:    user.ID.String(),
+		Email: user.Email,
+		Role:  user.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenValidityDuration)),
+		},
+	}
+	jwtTok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := jwtTok.SignedString([]byte(ar.config.SessionSecret))
 	if err != nil {
-		return ctx.SendStatus(http.StatusUnauthorized)
+		return ctx.NoContent(http.StatusUnauthorized)
 	}
-	sess.Set(secureSession.SecureSessionStoreKey, user.Email)
-	if err := sess.Save(); err != nil {
-		log.Error().Err(err).Msgf("failed to set the session")
-		return ctx.SendStatus(http.StatusInternalServerError)
-	}
-	return ctx.Status(http.StatusOK).JSON(user)
-}
-
-// Logout godoc
-// @Summary Logout
-// @Failure 500
-// @Success 200
-// @Router /v1/logout [post]
-func (ar *AuthRoutes) Logout(ctx *fiber.Ctx) error {
-	err := ar.sessionStore.Reset()
-	if err != nil {
-		log.Error().Err(err).Msgf("failed to remove the session")
-		return ctx.SendStatus(http.StatusInternalServerError)
-	}
-	expireCookie(ctx)
-	return ctx.SendStatus(http.StatusOK)
-}
-
-func expireCookie(ctx *fiber.Ctx) {
-	cookie := new(fiber.Cookie)
-	cookie.Name = secureSession.SecureCookieName
-	cookie.Expires = time.Now().Add(-3 * time.Second)
-	ctx.Cookie(cookie)
+	return ctx.JSON(http.StatusOK, jwtAuthResponse{
+		AuthUser:    *user,
+		AccessToken: token,
+	})
 }

@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@heroicons/react": "^2.0.18",
+    "@phosphor-icons/react": "^2.0.15",
     "autoprefixer": "^10.4.13",
     "axios": "^1.2.2",
     "flowbite": "^1.8.1",

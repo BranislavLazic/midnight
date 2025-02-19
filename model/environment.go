@@ -20,10 +20,3 @@ func (cer *EnvironmentRequest) Sanitize() {
 func (cer *EnvironmentRequest) ToPersistentEnvironment() *Environment {
 	return &Environment{Name: cer.Name}
 }
-
-type EnvironmentRepository interface {
-	Create(env *Environment) (EnvironmentID, error)
-	GetAll() ([]Environment, error)
-	GetByID(ID EnvironmentID) (*Environment, error)
-	DeleteAll() error
-}

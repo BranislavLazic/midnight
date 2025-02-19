@@ -1,22 +1,22 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/branislavlazic/midnight/api/validation"
 	"github.com/branislavlazic/midnight/model"
+	"github.com/branislavlazic/midnight/repository/postgres"
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 )
 
 type EnvironmentRoutes struct {
-	envRepo model.EnvironmentRepository
+	repo *postgres.Repository
 }
 
-func NewEnvironmentRoutes(envRepo model.EnvironmentRepository) *EnvironmentRoutes {
-	return &EnvironmentRoutes{envRepo: envRepo}
+func NewEnvironmentRoutes(repo *postgres.Repository) *EnvironmentRoutes {
+	return &EnvironmentRoutes{repo: repo}
 }
 
 // CreateEnvironment godoc
@@ -25,23 +25,22 @@ func NewEnvironmentRoutes(envRepo model.EnvironmentRepository) *EnvironmentRoute
 // @Failure 400,422,500
 // @Success 201
 // @Router /v1/environments [post]
-func (er *EnvironmentRoutes) CreateEnvironment(ctx *fiber.Ctx) error {
+func (er *EnvironmentRoutes) CreateEnvironment(ctx echo.Context) error {
 	var envRequest *model.EnvironmentRequest
-	if err := ctx.BodyParser(&envRequest); err != nil {
+	if err := ctx.Bind(&envRequest); err != nil {
 		log.Debug().Err(err).Msg("failed to parse the request as environment")
-		return ctx.SendStatus(http.StatusBadRequest)
+		return ctx.NoContent(http.StatusBadRequest)
 	}
 	envRequest.Sanitize()
 	if err := validator.New().Struct(envRequest); err != nil {
-		return ctx.Status(http.StatusUnprocessableEntity).JSON(validation.ToValidationErrors(err.(validator.ValidationErrors)))
+		return ctx.JSON(http.StatusUnprocessableEntity, validation.ToValidationErrors(err.(validator.ValidationErrors)))
 	}
-	ID, err := er.envRepo.Create(envRequest.ToPersistentEnvironment())
+	_, err := er.repo.CreateEnvironment(envRequest.ToPersistentEnvironment())
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create a service")
-		return ctx.SendStatus(http.StatusInternalServerError)
+		return ctx.NoContent(http.StatusInternalServerError)
 	}
-	ctx.Set("Location", string(ctx.Request().Host())+ctx.Route().Path+"/"+fmt.Sprintf("%d", ID))
-	return ctx.SendStatus(http.StatusCreated)
+	return ctx.NoContent(http.StatusCreated)
 }
 
 // GetAllEnvironments godoc
@@ -49,11 +48,11 @@ func (er *EnvironmentRoutes) CreateEnvironment(ctx *fiber.Ctx) error {
 // @Failure 404
 // @Success 200
 // @Router /v1/environments [get]
-func (er *EnvironmentRoutes) GetAllEnvironments(ctx *fiber.Ctx) error {
-	envs, err := er.envRepo.GetAll()
+func (er *EnvironmentRoutes) GetAllEnvironments(ctx echo.Context) error {
+	envs, err := er.repo.GetAllEnvironments()
 	if err != nil {
 		log.Debug().Err(err).Msg("failed to fetch all environments")
-		return ctx.SendStatus(http.StatusNotFound)
+		return ctx.NoContent(http.StatusNotFound)
 	}
-	return ctx.Status(http.StatusOK).JSON(envs)
+	return ctx.JSON(http.StatusOK, envs)
 }

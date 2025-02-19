@@ -3,20 +3,16 @@ package main
 import (
 	"context"
 	"embed"
-	_ "embed"
+	"fmt"
+	"time"
+
 	"github.com/allegro/bigcache/v3"
 	"github.com/branislavlazic/midnight/api"
 	"github.com/branislavlazic/midnight/config"
 	"github.com/branislavlazic/midnight/db"
+	"github.com/branislavlazic/midnight/repository/postgres"
 	"github.com/rs/zerolog/log"
-	"time"
 )
-
-//go:embed webapp/dist
-var uiStaticFiles embed.FS
-
-//go:embed webapp/dist/index.html
-var indexFile embed.FS
 
 //go:embed migrations/*.sql
 var dbMigrations embed.FS
@@ -37,13 +33,14 @@ func main() {
 	}
 
 	serverSettings := api.ServerSettings{
-		Config:      cfg,
-		DB:          pgDb,
-		Cache:       cache,
-		IndexFile:   indexFile,
-		StaticFiles: uiStaticFiles,
+		Config: cfg,
+		DB:     pgDb,
+		Cache:  cache,
 	}
-	err = api.StartServer(serverSettings)
+
+	a := api.NewApp(postgres.NewRepository(pgDb), serverSettings)
+	app := a.InitApi()
+	app.Start(fmt.Sprintf(":%d", serverSettings.Config.AppPort))
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start the server")
 	}

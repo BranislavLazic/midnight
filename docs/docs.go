@@ -16,6 +16,47 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/environments": {
+            "get": {
+                "summary": "Get all environments",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create an environment",
+                "parameters": [
+                    {
+                        "description": "Environment request body",
+                        "name": "environmentRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.EnvironmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/v1/login": {
             "post": {
                 "summary": "Login",
@@ -45,19 +86,6 @@ const docTemplate = `{
                     },
                     "422": {
                         "description": "Unprocessable Entity"
-                    }
-                }
-            }
-        },
-        "/v1/logout": {
-            "post": {
-                "summary": "Logout",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -203,6 +231,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.EnvironmentRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.LoginRequest": {
             "type": "object",
             "required": [
@@ -229,9 +265,16 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 1000000
                 },
+                "environmentId": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 255
+                },
+                "responseBody": {
+                    "type": "string",
+                    "maxLength": 8192
                 },
                 "url": {
                     "type": "string",
